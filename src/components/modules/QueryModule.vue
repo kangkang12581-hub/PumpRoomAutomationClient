@@ -23,7 +23,6 @@
               <option value="net_weight">净重</option>
               <option value="speed">速度</option>
               <option value="current">电流</option>
-              <option value="winding_temperature">绕组温度</option>
               <option value="cabinet_out_temperature">柜外温度</option>
               <option value="cabinet_in_temperature">柜内温度</option>
               <option value="cabinet_out_humidity">柜外湿度</option>
@@ -139,6 +138,8 @@
 
 <script>
 import { ref, computed } from 'vue'
+import { dataQueryAPI } from '@/services/api'
+import { getCurrentSite } from '@/utils/siteManager'
 
 export default {
   name: 'QueryModule',
@@ -157,43 +158,38 @@ export default {
 
     const queryResults = ref([])
 
-    // 模拟数据
-    const generateMockData = () => {
-      const dataTypes = [
-        { type: 'upstream_level', unit: 'm', min: 1.0, max: 10.0 },
-        { type: 'downstream_level', unit: 'm', min: 0.5, max: 8.0 },
-        { type: 'instant_flow', unit: 'm³/h', min: 50, max: 500 },
-        { type: 'flow_velocity', unit: 'm/s', min: 0.1, max: 3.5 },
-        { type: 'water_temperature', unit: '°C', min: 5, max: 35 },
-        { type: 'net_weight', unit: 'kg', min: 100, max: 10000 },
-        { type: 'speed', unit: 'm/min', min: 10, max: 300 },
-        { type: 'current', unit: 'A', min: 0, max: 200 },
-        { type: 'winding_temperature', unit: '°C', min: 20, max: 120 },
-        { type: 'cabinet_out_temperature', unit: '°C', min: -10, max: 45 },
-        { type: 'cabinet_in_temperature', unit: '°C', min: 0, max: 50 },
-        { type: 'cabinet_out_humidity', unit: '%', min: 10, max: 100 }
-      ]
-
-      const data = []
-      const now = new Date()
-      
-      for (let i = 0; i < 100; i++) {
-        const timestamp = new Date(now.getTime() - i * 30 * 60 * 1000) // 每30分钟一条记录
-        const typeConfig = dataTypes[Math.floor(Math.random() * dataTypes.length)]
-        const value = (Math.random() * (typeConfig.max - typeConfig.min) + typeConfig.min).toFixed(1)
-        
-        data.push({
-          id: i + 1,
-          timestamp,
-          type: typeConfig.type,
-          value: parseFloat(value),
-          unit: typeConfig.unit,
-          status: Math.random() > 0.1 ? 'normal' : 'warning'
-        })
-      }
-      
-      return data.sort((a, b) => b.timestamp - a.timestamp)
+    // 前端数据类型到后端 metric 的映射
+    const dataTypeToMetric = {
+      'upstream_level': 'upstream-water-level',
+      'downstream_level': 'downstream-water-level',
+      'instant_flow': 'instantaneous-flow',
+      'flow_velocity': 'flow-velocity',
+      'water_temperature': 'water-temperature',
+      'net_weight': 'net-weight',
+      'speed': 'speed',
+      'current': 'current',
+      'cabinet_out_temperature': 'external-temp',
+      'cabinet_in_temperature': 'internal-temp',
+      'cabinet_out_humidity': 'external-humidity'
     }
+
+    // 数据类型到单位的映射
+    const dataTypeToUnit = {
+      'upstream_level': 'm',
+      'downstream_level': 'm',
+      'instant_flow': 'm³/h',
+      'flow_velocity': 'm/s',
+      'water_temperature': '°C',
+      'net_weight': 'kg',
+      'speed': 'm/min',
+      'current': 'A',
+      'cabinet_out_temperature': '°C',
+      'cabinet_in_temperature': '°C',
+      'cabinet_out_humidity': '%'
+    }
+
+    // 所有支持的数据类型列表（用于查询全部）
+    const allDataTypes = Object.keys(dataTypeToMetric)
 
     const totalPages = computed(() => {
       return Math.ceil(queryResults.value.length / pageSize)
@@ -233,12 +229,16 @@ export default {
     }
 
     const formatDateTime = (timestamp) => {
+      if (typeof timestamp === 'string') {
+        timestamp = new Date(timestamp)
+      }
       return timestamp.toLocaleString('zh-CN', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
+        second: '2-digit'
       })
     }
 
@@ -248,57 +248,90 @@ export default {
       currentPage.value = 1
       
       try {
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        
-        // 生成模拟数据
-        let data = generateMockData()
-        
-        // 根据查询条件过滤数据
-        if (queryParams.value.dataType !== 'all') {
-          data = data.filter(item => item.type === queryParams.value.dataType)
+        // 获取当前站点
+        const currentSite = getCurrentSite()
+        if (!currentSite || !currentSite.id) {
+          alert('请先选择站点')
+          queryResults.value = []
+          return
         }
-        
-        // 时间范围过滤
-        const now = new Date()
-        let startTime
-        
-        switch (queryParams.value.timeRange) {
-          case '1h':
-            startTime = new Date(now.getTime() - 60 * 60 * 1000)
-            break
-          case '6h':
-            startTime = new Date(now.getTime() - 6 * 60 * 60 * 1000)
-            break
-          case '24h':
-            startTime = new Date(now.getTime() - 24 * 60 * 60 * 1000)
-            break
-          case '7d':
-            startTime = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-            break
-          case '30d':
-            startTime = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-            break
-          case 'custom_days':
-            if (queryParams.value.startDate && queryParams.value.endDate) {
-              const startOfDay = new Date(queryParams.value.startDate)
-              startOfDay.setHours(0, 0, 0, 0)
-              const endOfDay = new Date(queryParams.value.endDate)
-              endOfDay.setHours(23, 59, 59, 999)
-              const from = startOfDay <= endOfDay ? startOfDay : endOfDay
-              const to = startOfDay <= endOfDay ? endOfDay : startOfDay
-              data = data.filter(item => 
-                item.timestamp >= from && item.timestamp <= to
+
+        const siteId = currentSite.id
+        const allResults = []
+
+        // 确定要查询的数据类型列表
+        const dataTypesToQuery = queryParams.value.dataType === 'all' 
+          ? allDataTypes 
+          : [queryParams.value.dataType]
+
+        // 为每个数据类型查询数据
+        for (const dataType of dataTypesToQuery) {
+          const metric = dataTypeToMetric[dataType]
+          if (!metric) {
+            console.warn(`未知的数据类型: ${dataType}`)
+            continue
+          }
+
+          try {
+            let response
+            if (queryParams.value.timeRange === 'custom_days') {
+              // 自定义日期查询
+              if (!queryParams.value.startDate || !queryParams.value.endDate) {
+                alert('请选择开始日期和结束日期')
+                continue
+              }
+              response = await dataQueryAPI.customDateQuery(
+                metric,
+                siteId,
+                queryParams.value.startDate,
+                queryParams.value.endDate
+              )
+            } else {
+              // 快捷查询
+              response = await dataQueryAPI.quickQuery(
+                metric,
+                siteId,
+                queryParams.value.timeRange
               )
             }
-            break
+
+            // 处理响应数据
+            // 后端返回格式: { success: true, data: { records: [...] } }
+            const responseData = response.data || response
+            const records = responseData.records || responseData.data?.records || []
+            
+            console.log(`查询 ${dataType} (${metric}) 返回 ${records.length} 条数据`)
+            
+            // 转换数据格式
+            records.forEach((record, index) => {
+              allResults.push({
+                id: `${dataType}_${record.timestamp}_${index}`,
+                timestamp: new Date(record.timestamp),
+                type: dataType,
+                value: parseFloat(record.value || 0),
+                unit: dataTypeToUnit[dataType] || '',
+                status: record.status || 'normal'
+              })
+            })
+          } catch (error) {
+            console.error(`查询 ${dataType} 数据失败:`, error)
+            // 继续查询其他数据类型，不中断整个查询
+          }
+        }
+
+        // 按时间戳降序排序
+        allResults.sort((a, b) => b.timestamp - a.timestamp)
+        
+        queryResults.value = allResults
+        
+        if (allResults.length === 0) {
+          console.warn('未查询到任何数据，请检查查询条件或数据库中的数据')
         }
         
-        if (queryParams.value.timeRange !== 'custom_days' && startTime) {
-          data = data.filter(item => item.timestamp >= startTime)
-        }
-        
-        queryResults.value = data
-        
+      } catch (error) {
+        console.error('查询数据失败:', error)
+        alert(`查询失败: ${error.message || '未知错误'}`)
+        queryResults.value = []
       } finally {
         loading.value = false
       }
