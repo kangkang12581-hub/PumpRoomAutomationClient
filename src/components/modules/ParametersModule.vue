@@ -733,15 +733,15 @@ export default {
 .parameters-module {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
   height: 100%;
   overflow: visible;
 }
 
 .parameter-sections {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
   overflow-y: auto;
   overflow-x: visible;
   max-height: calc(100vh - 200px);
@@ -770,45 +770,45 @@ export default {
 }
 
 .parameter-section {
-  padding: 24px;
+  padding: 16px;
 }
 
 .section-title {
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
-  margin-bottom: 20px;
+  margin-bottom: 12px;
   border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
+  padding-bottom: 6px;
 }
 
 .parameter-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 12px;
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
 }
 
 .form-group label {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
   color: #333;
 }
 
 .input-field {
-  padding: 12px;
+  padding: 8px 10px;
   border: 2px solid #e1e5e9;
-  border-radius: 8px;
+  border-radius: 6px;
   font-size: 14px;
   transition: all 0.3s ease;
 }
@@ -822,10 +822,10 @@ export default {
 .alarm-test-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding: 20px;
+  gap: 12px;
+  padding: 16px;
   border: 1px dashed #d5dbe3;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #f9fbff;
 }
 
@@ -873,7 +873,7 @@ export default {
 
 
 .save-section {
-  padding: 24px;
+  padding: 16px;
   text-align: center;
 }
 
@@ -993,6 +993,12 @@ export default {
 
 .status-button svg {
   flex-shrink: 0;
+}
+
+@media (max-width: 1200px) {
+  .parameter-sections {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
