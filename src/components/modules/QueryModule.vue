@@ -71,7 +71,7 @@
           <line x1="8" y1="16" x2="16" y2="16" stroke="currentColor" stroke-width="2"/>
           <line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="2"/>
         </svg>
-        查询结果 ({{ totalCount }} 条记录)
+        查询结果
       </h3>
       <div class="results-content">
         <div class="table-container">
