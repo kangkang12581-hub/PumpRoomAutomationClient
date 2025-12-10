@@ -137,9 +137,9 @@
 </template>
 
 <script>
-import { ref, computed } from 'vue'
-import { dataQueryAPI } from '@/services/api'
-import { getCurrentSite } from '@/utils/siteManager'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { dataQueryAPI, siteAPI } from '@/services/api'
+import { getCurrentSite, getCurrentSiteCode, onSiteChange } from '@/utils/siteManager'
 
 export default {
   name: 'QueryModule',
@@ -148,6 +148,7 @@ export default {
     const queryExecuted = ref(false)
     const currentPage = ref(1)
     const pageSize = 20
+    const currentSiteCode = ref(getCurrentSiteCode())
 
     const queryParams = ref({
       dataType: 'all',
@@ -248,15 +249,39 @@ export default {
       currentPage.value = 1
       
       try {
-        // 获取当前站点
-        const currentSite = getCurrentSite()
-        if (!currentSite || !currentSite.id) {
+        // 获取当前站点代码（每次查询时都获取最新的，确保站点切换后能获取新站点数据）
+        const siteCode = currentSiteCode.value || getCurrentSiteCode()
+        if (!siteCode) {
           alert('请先选择站点')
           queryResults.value = []
           return
         }
+        
+        console.log('开始查询，当前站点代码:', siteCode)
 
-        const siteId = currentSite.id
+        // 获取站点信息以获取站点ID
+        let siteId
+        const currentSite = getCurrentSite()
+        if (currentSite && currentSite.id) {
+          siteId = currentSite.id
+        } else {
+          // 如果站点对象没有ID，通过API获取站点信息
+          try {
+            const siteInfo = await siteAPI.getSite(siteCode)
+            const siteData = siteInfo.data || siteInfo
+            siteId = siteData.id || siteData.siteId
+            if (!siteId) {
+              throw new Error('无法获取站点ID')
+            }
+          } catch (error) {
+            console.error('获取站点信息失败:', error)
+            alert('获取站点信息失败，请重新选择站点')
+            queryResults.value = []
+            return
+          }
+        }
+
+        console.log('查询站点ID:', siteId, '站点代码:', siteCode)
         const allResults = []
 
         // 确定要查询的数据类型列表
@@ -336,6 +361,32 @@ export default {
         loading.value = false
       }
     }
+
+    // 监听站点切换事件
+    const handleSiteChange = (siteCode, site) => {
+      console.log('站点已切换:', siteCode, site)
+      currentSiteCode.value = siteCode
+      // 清空之前的查询结果，提示用户重新查询
+      if (queryExecuted.value && queryResults.value.length > 0) {
+        queryResults.value = []
+        queryExecuted.value = false
+        currentPage.value = 1
+        // 可选：显示提示信息
+        console.log('站点已切换，请重新查询数据')
+      }
+    }
+
+    // 组件挂载时监听站点切换
+    onMounted(() => {
+      // 初始化当前站点代码
+      currentSiteCode.value = getCurrentSiteCode()
+      // 监听站点切换
+      const unsubscribe = onSiteChange(handleSiteChange)
+      // 组件卸载时取消监听
+      onUnmounted(() => {
+        unsubscribe()
+      })
+    })
 
     // 已移除 导出数据 逻辑
 
