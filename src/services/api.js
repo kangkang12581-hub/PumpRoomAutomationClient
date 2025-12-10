@@ -33,13 +33,22 @@ class ApiService {
   /**
    * 发送HTTP请求
    */
-  async request(url, options = {}) {
+  async request(url, options = {}, retryCount = 0) {
     // 处理查询参数
     let finalUrl = url
     if (options.params) {
       const queryString = new URLSearchParams(options.params).toString()
       finalUrl = `${url}${url.includes('?') ? '&' : '?'}${queryString}`
       delete options.params // 从options中删除params，避免传递给fetch
+    }
+
+    // 检查token是否即将过期，如果是则先刷新
+    if (this.isTokenExpiringSoon() && this.isAuthenticated() && retryCount === 0) {
+      try {
+        await this.refreshToken()
+      } catch (error) {
+        console.warn('自动刷新token失败，继续使用原token:', error)
+      }
     }
 
     const config = {
@@ -53,10 +62,25 @@ class ApiService {
       // 检查响应状态
       if (!response.ok) {
         if (response.status === 401) {
-          // 未授权，清除本地token并跳转到登录页
-          this.clearAuth()
-          window.location.href = '/login'
-          throw new Error('登录已过期，请重新登录')
+          // 如果是401且是第一次尝试，尝试刷新token后重试
+          if (retryCount === 0 && this.isAuthenticated()) {
+            try {
+              await this.refreshToken()
+              // 重试请求（最多重试1次）
+              return this.request(url, options, retryCount + 1)
+            } catch (refreshError) {
+              console.error('刷新token失败，跳转到登录页:', refreshError)
+              // 刷新失败，清除本地token并跳转到登录页
+              this.clearAuth()
+              window.location.href = '/login'
+              throw new Error('登录已过期，请重新登录')
+            }
+          } else {
+            // 重试后仍然401，清除本地token并跳转到登录页
+            this.clearAuth()
+            window.location.href = '/login'
+            throw new Error('登录已过期，请重新登录')
+          }
         }
         
         // 尝试解析错误响应
@@ -147,15 +171,70 @@ class ApiService {
     localStorage.removeItem('authToken')
     localStorage.removeItem('username')
     localStorage.removeItem('userInfo')
+    localStorage.removeItem('tokenExpirationTime')
   }
 
   /**
    * 保存认证信息
    */
-  saveAuth(token, userInfo) {
+  saveAuth(token, userInfo, expiresIn = null) {
     localStorage.setItem('authToken', token)
     localStorage.setItem('username', userInfo.username)
     localStorage.setItem('userInfo', JSON.stringify(userInfo))
+    
+    // 保存token过期时间（提前5分钟刷新）
+    if (expiresIn) {
+      const expirationTime = Date.now() + (expiresIn - 300) * 1000 // 提前5分钟刷新
+      localStorage.setItem('tokenExpirationTime', expirationTime.toString())
+    }
+  }
+  
+  /**
+   * 检查token是否即将过期
+   */
+  isTokenExpiringSoon() {
+    const expirationTime = localStorage.getItem('tokenExpirationTime')
+    if (!expirationTime) return true // 如果没有过期时间，认为需要刷新
+    
+    return Date.now() >= parseInt(expirationTime)
+  }
+  
+  /**
+   * 刷新token
+   */
+  async refreshToken() {
+    try {
+      const token = this.getToken()
+      if (!token) {
+        throw new Error('没有token可刷新')
+      }
+      
+      const response = await fetch(`${this.baseURL}/auth/refresh`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      
+      if (!response.ok) {
+        throw new Error('刷新token失败')
+      }
+      
+      const data = await response.json()
+      const refreshData = data.data || data
+      
+      // 更新token和过期时间
+      const userInfo = this.getCurrentUser()
+      if (userInfo) {
+        this.saveAuth(refreshData.accessToken, userInfo, refreshData.expiresIn)
+      }
+      
+      return refreshData
+    } catch (error) {
+      console.error('刷新token失败:', error)
+      throw error
+    }
   }
 
   /**
@@ -193,8 +272,8 @@ export const authAPI = {
     // 后端返回格式: { success: true, message: "...", data: { accessToken, user, ... } }
     const loginData = response.data || response
     
-    // 保存认证信息
-    apiService.saveAuth(loginData.accessToken, loginData.user)
+    // 保存认证信息（包括过期时间）
+    apiService.saveAuth(loginData.accessToken, loginData.user, loginData.expiresIn)
     
     return loginData
   },
@@ -228,6 +307,13 @@ export const authAPI = {
   async getCurrentUser() {
     const response = await apiService.get('/auth/me')
     return response.data || response
+  },
+  
+  /**
+   * 刷新访问令牌
+   */
+  async refreshToken() {
+    return await apiService.refreshToken()
   },
 
   /**
