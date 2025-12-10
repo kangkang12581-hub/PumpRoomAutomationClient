@@ -215,7 +215,7 @@
 <script>
 import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
 import { alarmRecordsAPI, siteAPI } from '@/services/api'
-import { getCurrentSite } from '@/utils/siteManager'
+import { getCurrentSite, getCurrentSiteCode, onSiteChange } from '@/utils/siteManager'
 
 export default {
   name: 'AlarmsModule',
@@ -230,6 +230,9 @@ export default {
     const autoRefreshEnabled = ref(true) // 默认开启自动刷新
     const autoRefreshInterval = ref(2000) // 2秒刷新一次
     let autoRefreshTimer = null
+    
+    // 防止循环调用的标志
+    let isUpdatingSiteFilter = false
     
     const filters = ref({
       site: 'all',
@@ -467,6 +470,21 @@ export default {
           loading.value = true
         }
         
+        // 每次加载时都获取当前站点，并确保过滤器使用当前站点
+        const currentSite = getCurrentSite()
+        const currentSiteId = currentSite && currentSite.id ? currentSite.id.toString() : null
+        
+        // 如果当前站点存在且与过滤器不一致，更新过滤器
+        if (currentSiteId && filters.value.site !== currentSiteId && !isUpdatingSiteFilter) {
+          console.log('🏢 [AlarmsModule] 检测到站点变化，更新过滤器为当前站点:', currentSiteId)
+          isUpdatingSiteFilter = true
+          filters.value.site = currentSiteId
+          // 注意：这里更新 filters.value.site 会触发 watch，watch 会调用 loadAlarms
+          // 但我们在 watch 中会检查 isUpdatingSiteFilter，避免无限循环
+          isUpdatingSiteFilter = false
+          return // 让 watch 来处理重新加载
+        }
+        
         // 计算时间范围
         const now = new Date()
         let startTime = null
@@ -494,12 +512,18 @@ export default {
           startTime: startTime ? startTime.toISOString() : null
         }
 
+        console.log('🔍 [AlarmsModule] 加载报警记录，参数:', params)
+        
         const response = await alarmRecordsAPI.getPaged(params)
+        
+        console.log('📥 [AlarmsModule] 后端返回的原始响应:', response)
         
         // 解析后端返回的数据结构: ApiResponse<PagedAlarmRecordsResponse>
         // 后端返回格式: { success: true, data: { items: [...], total: ..., page: ..., pageSize: ..., totalPages: ... }, message: "..." }
         const api = response.data || response
         const payload = api.data || api
+        
+        console.log('📦 [AlarmsModule] 解析后的数据:', { api, payload })
         
         // 兼容大小写：后端返回 Items（大写），前端可能期望 items（小写）
         const list = payload.items || payload.Items || payload.data?.items || payload.data?.Items || []
@@ -507,6 +531,8 @@ export default {
         
         // 兼容大小写：后端返回 Total（大写），前端可能期望 total（小写）
         totalRecords.value = payload.total || payload.Total || 0
+        
+        console.log(`✅ [AlarmsModule] 加载完成: 共 ${totalRecords.value} 条记录，当前页 ${list.length} 条`)
         
         // 如果后端返回了总页数，确保当前页码不超过总页数
         const totalPagesFromApi = payload.totalPages || payload.TotalPages || 0
@@ -605,21 +631,34 @@ export default {
     }
 
     watch([currentPage, filters], () => {
+      // 如果正在更新站点过滤器，跳过这次加载（避免循环调用）
+      if (isUpdatingSiteFilter) {
+        return
+      }
       loadAlarms(false) // 正常加载，显示 loading
     }, { deep: true })
     
     // 监听pageSize变化，但通过handlePageSizeChange处理（避免重复触发）
 
     // 监听站点切换事件
-    const handleSiteChange = () => {
-      const currentSite = getCurrentSite()
-      if (currentSite && currentSite.id) {
+    const handleSiteChange = (siteCode, site) => {
+      console.log('🔄 [AlarmsModule] 站点已切换:', { siteCode, site })
+      
+      if (site && site.id) {
         // 更新站点过滤器，watch 会自动触发 loadAlarms
-        filters.value.site = currentSite.id.toString()
+        filters.value.site = site.id.toString()
         // 重置到第一页
         currentPage.value = 1
+        console.log('🏢 [AlarmsModule] 站点切换后更新过滤器:', filters.value.site)
+      } else {
+        // 如果没有站点信息，显示所有站点的报警
+        filters.value.site = 'all'
+        console.log('🏢 [AlarmsModule] 站点切换后没有站点信息，显示所有站点')
       }
     }
+
+    // 存储取消监听的函数
+    let unsubscribeSiteChange = null
 
     onMounted(async () => {
       await loadSites()
@@ -628,6 +667,11 @@ export default {
       const currentSite = getCurrentSite()
       if (currentSite && currentSite.id) {
         filters.value.site = currentSite.id.toString()
+        console.log('🏢 [AlarmsModule] 初始化时设置站点过滤器:', filters.value.site)
+      } else {
+        // 如果没有当前站点，显示所有站点的报警
+        filters.value.site = 'all'
+        console.log('🏢 [AlarmsModule] 没有当前站点，显示所有站点的报警')
       }
       
       await loadAlarms()
@@ -637,19 +681,19 @@ export default {
         startAutoRefresh()
       }
       
-      // 监听站点切换事件
-      if (typeof window !== 'undefined') {
-        window.addEventListener('site-changed', handleSiteChange)
-      }
+      // 使用站点管理器的 onSiteChange 监听站点切换
+      unsubscribeSiteChange = onSiteChange(handleSiteChange)
+      console.log('👂 [AlarmsModule] 已注册站点切换监听器')
     })
 
     onUnmounted(() => {
       // 停止自动刷新
       stopAutoRefresh()
       
-      // 清理事件监听器
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('site-changed', handleSiteChange)
+      // 取消站点切换监听
+      if (unsubscribeSiteChange) {
+        unsubscribeSiteChange()
+        console.log('🔇 [AlarmsModule] 已取消站点切换监听器')
       }
     })
 
