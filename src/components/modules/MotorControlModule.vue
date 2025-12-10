@@ -520,11 +520,11 @@
                     :disabled="loading"
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                    <path d="M23 4V10H17" stroke="currentColor" stroke-width="2"/>
-                    <path d="M20.49 15C19.2969 17.5 16.8692 19.3333 14 19.9297" stroke="currentColor" stroke-width="2"/>
+                  <path d="M23 4V10H17" stroke="currentColor" stroke-width="2"/>
+                  <path d="M20.49 15C19.2969 17.5 16.8692 19.3333 14 19.9297" stroke="currentColor" stroke-width="2"/>
                 </svg>
-                    错误复位
-                </button>
+                错误复位
+              </button>
                 </div>
               </div>
             </div>
@@ -1609,14 +1609,13 @@ export default {
 <style scoped>
 .operation-module {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: auto;
-  gap: 6px;
-  padding: 6px;
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  grid-template-columns: 1.2fr 1fr;
+  grid-template-rows: 1fr;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
   height: calc(100vh - 80px);
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow: hidden;
   box-sizing: border-box;
 }
 
@@ -1624,68 +1623,87 @@ export default {
 .device-panel,
 .motor-panel,
 .system-control-panel {
-  padding: 5px;
+  padding: 14px;
   background: #ffffff;
-  border-radius: 6px;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.04);
-  border: 1px solid rgba(102, 126, 234, 0.1);
-  transition: all 0.3s ease;
+  border-radius: 12px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08), 
+              0 2px 6px rgba(0, 0, 0, 0.04);
+  border: 2px solid rgba(102, 126, 234, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
-  overflow: visible;
+  overflow: hidden;
   height: 100%;
+  min-height: 600px;
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
+  backdrop-filter: blur(10px);
 }
 
 .device-panel::before,
 .motor-panel::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
-  opacity: 0.8;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  height: 5px;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  opacity: 1;
+  border-radius: 12px 12px 0 0;
 }
 
 .device-panel:hover,
 .motor-panel:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  border-color: rgba(102, 126, 234, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12),
+              0 4px 16px rgba(102, 126, 234, 0.3);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.system-control-panel {
+  border-color: rgba(118, 75, 162, 0.2);
+}
+
+.system-control-panel:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.12),
+              0 4px 16px rgba(118, 75, 162, 0.3);
+  border-color: rgba(118, 75, 162, 0.5);
 }
 
 .panel-title {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 13px;
+  gap: 8px;
+  font-size: 15px;
   font-weight: 700;
-  color: #1a202c;
-  margin-bottom: 4px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #e2e8f0;
+  color: #2d3748;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e2e8f0;
   position: relative;
   justify-content: space-between;
   flex-shrink: 0;
+  letter-spacing: -0.3px;
 }
 
 .panel-title::after {
   content: '';
   position: absolute;
-  bottom: -3px;
+  bottom: -2px;
   left: 0;
   width: 50px;
   height: 3px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
   border-radius: 2px;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
 }
 
 .panel-title svg {
-  width: 14px;
-  height: 14px;
+  width: 18px;
+  height: 18px;
+  color: #667eea;
 }
 
 .panel-title .title-content {
@@ -1698,7 +1716,7 @@ export default {
   color: #666;
   flex: 1;
   min-height: 0;
-  overflow: visible;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
 }
@@ -1710,6 +1728,8 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 
@@ -1717,48 +1737,66 @@ export default {
 .motors-container {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 12px;
   flex: 1;
   min-height: 0;
+  overflow: hidden;
 }
 
 /* 电机项 */
 .motor-item {
-  padding: 4px 6px;
-  border-radius: 5px;
-  transition: all 0.3s ease;
+  padding: 12px;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
+  background: linear-gradient(135deg, #fdfbfb 0%, #f7f9fc 100%);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.motor-item:hover {
+  transform: translateX(3px);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  border-color: rgba(102, 126, 234, 0.2);
 }
 
 .motor-item:not(:last-child) {
-  border-bottom: 1px solid #e2e8f0;
-  padding-bottom: 4px;
-  margin-bottom: 4px;
+  margin-bottom: 0;
 }
 
 /* 电机分隔线 */
 .motor-divider {
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
-  margin: 3px 0;
+  display: none;
 }
 
 /* 电机项头部 */
 .motor-item-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 4px;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-shrink: 0;
 }
 
 .motor-item-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 4px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
   flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.motor-item:hover .motor-item-icon {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .grating-motor .motor-item-icon {
@@ -1776,16 +1814,26 @@ export default {
   color: white;
 }
 
+.motor-item-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 .motor-item-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #1a202c;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2d3748;
   margin: 0;
   flex: 1;
+  letter-spacing: -0.3px;
 }
 
 .motor-item-content {
   padding-left: 0;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 
@@ -1808,29 +1856,57 @@ export default {
 }
 
 .status-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
+  transition: all 0.3s ease;
 }
 
 .status-dot.running {
   background: #27ae60;
-  box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.2);
+  box-shadow: 0 0 0 4px rgba(39, 174, 96, 0.25),
+              0 0 12px rgba(39, 174, 96, 0.4);
+  animation: pulse-running 2s infinite;
+}
+
+@keyframes pulse-running {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
 }
 
 .status-dot.stopped {
   background: #95a5a6;
+  box-shadow: 0 0 0 2px rgba(149, 165, 166, 0.2);
 }
 
 .status-dot.fault {
   background: #e74c3c;
-  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.2);
+  box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.3),
+              0 0 12px rgba(231, 76, 60, 0.5);
+  animation: pulse-error 1s infinite;
+}
+
+@keyframes pulse-error {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.15);
+    opacity: 0.8;
+  }
 }
 
 .status-text {
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 600;
-  color: #333;
+  color: #2d3748;
 }
 
 .motor-params {
@@ -2261,12 +2337,26 @@ export default {
 /* 自动模式控制按钮样式 */
 .auto-control-buttons {
   display: flex;
-  gap: 4px;
-  justify-content: center;
+  gap: 6px;
+  justify-content: stretch;
   flex-wrap: wrap;
-  margin-top: 4px;
-  padding-top: 4px;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  width: 100%;
+  margin-top: 0;
+  padding: 8px;
+  background: rgba(102, 126, 234, 0.05);
+  border-radius: 8px;
+  border: 1px dashed rgba(102, 126, 234, 0.2);
+}
+
+.auto-control-buttons .control-btn {
+  flex: 1 1 auto;
+  min-width: 95px;
+  padding: 8px 12px;
+  font-size: 11px;
+  min-height: 34px;
+  white-space: nowrap;
+  overflow: visible;
+  justify-content: center;
 }
 
 /* 振动暂停按钮激活状态 */
@@ -2519,10 +2609,12 @@ export default {
 }
 
 /* 响应式设计 */
-@media (max-width: 1200px) {
+@media (max-width: 1400px) {
   .operation-module {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
+    gap: 16px;
+    padding: 16px;
   }
   
   .motor-section {
@@ -2536,11 +2628,50 @@ export default {
   }
 }
 
+@media (max-width: 1200px) {
+  .operation-module {
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .device-panel,
+  .motor-panel,
+  .system-control-panel {
+    padding: 16px;
+  }
+  
+  .motors-container {
+    gap: 12px;
+  }
+  
+  .motor-item {
+    padding: 16px;
+  }
+}
+
 @media (max-width: 768px) {
   .operation-module {
     height: calc(100vh - 100px);
+    gap: 12px;
+    padding: 12px;
+  }
+  
+  .device-panel,
+  .motor-panel,
+  .system-control-panel {
+    padding: 16px;
+    border-radius: 12px;
+  }
+  
+  .panel-title {
+    font-size: 16px;
     gap: 8px;
-    padding: 8px;
+    margin-bottom: 12px;
+  }
+  
+  .panel-title svg {
+    width: 20px;
+    height: 20px;
   }
   
   .motor-section {
@@ -2551,6 +2682,41 @@ export default {
   .system-control-section {
     grid-column: 1;
     grid-row: 2;
+  }
+  
+  .motor-item {
+    padding: 12px;
+  }
+  
+  .motor-item-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .motor-item-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .motor-item-title {
+    font-size: 16px;
+  }
+  
+  .motor-status-badges {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+    gap: 8px;
+    padding: 12px;
+  }
+  
+  .status-badge {
+    min-height: 60px;
+    padding: 8px 6px;
+    gap: 6px;
+  }
+  
+  .status-badge svg {
+    width: 16px;
+    height: 16px;
   }
 }
 
@@ -2703,19 +2869,20 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
-  padding: 2px 2px;
-  border-radius: 4px;
-  border: 1px solid #e2e8f0;
-  font-size: 8px;
+  gap: 4px;
+  padding: 8px 4px;
+  border-radius: 6px;
+  border: 1.5px solid #e2e8f0;
+  font-size: 10px;
   font-weight: 600;
   color: #64748b;
   background: #ffffff;
-  transition: all 0.3s ease;
-  min-height: 32px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 50px;
   justify-content: center;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .status-badge::before {
@@ -2725,14 +2892,14 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
   opacity: 0;
   transition: opacity 0.3s ease;
 }
 
 .status-badge:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
   border-color: #667eea;
 }
 
@@ -2742,16 +2909,17 @@ export default {
 
 .status-badge svg {
   color: currentColor;
-  width: 8px;
-  height: 8px;
+  width: 16px;
+  height: 16px;
 }
 
 .status-badge.running.active {
-  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
   color: #fff;
-  border-color: transparent;
-  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.25);
-  transform: none;
+  border-color: #27ae60;
+  box-shadow: 0 4px 16px rgba(39, 174, 96, 0.4),
+              0 0 24px rgba(39, 174, 96, 0.2);
+  transform: scale(1.05);
 }
 
 .status-badge.running.active::before {
@@ -2759,11 +2927,19 @@ export default {
 }
 
 .status-badge.trip.active {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
   color: #fff;
-  border-color: transparent;
-  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.25);
-  transform: none;
+  border-color: #c0392b;
+  box-shadow: 0 4px 16px rgba(231, 76, 60, 0.4),
+              0 0 24px rgba(231, 76, 60, 0.2);
+  transform: scale(1.05);
+  animation: shake 0.5s infinite;
+}
+
+@keyframes shake {
+  0%, 100% { transform: scale(1.05) translateX(0); }
+  25% { transform: scale(1.05) translateX(-2px); }
+  75% { transform: scale(1.05) translateX(2px); }
 }
 
 .status-badge.trip.active::before {
@@ -2773,22 +2949,26 @@ export default {
 /* 通用：电机状态徽章容器（振动电机等可复用） */
 .motor-status-badges {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(45px, 1fr));
-  gap: 3px;
-  padding: 2px;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 8px;
+  padding: 10px;
   background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-  border-radius: 5px;
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  border-radius: 8px;
+  border: 1.5px solid rgba(226, 232, 240, 0.6);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.04);
+  flex: 1;
+  min-height: 0;
+  align-content: start;
 }
 
 /* 其他状态的激活配色，保持统一风格 */
 .status-badge.moisture.active {
-  background: linear-gradient(135deg, #20c997, #17a2b8);
+  background: linear-gradient(135deg, #20c997 0%, #17a2b8 100%);
   color: #fff;
-  border-color: transparent;
-  box-shadow: 0 2px 8px rgba(23, 162, 184, 0.25);
-  transform: none;
+  border-color: #17a2b8;
+  box-shadow: 0 4px 16px rgba(23, 162, 184, 0.4),
+              0 0 24px rgba(23, 162, 184, 0.2);
+  transform: scale(1.05);
 }
 
 .status-badge.moisture.active::before {
@@ -2796,11 +2976,12 @@ export default {
 }
 
 .status-badge.cooling.active {
-  background: linear-gradient(135deg, #3498db, #2980b9);
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
   color: #fff;
-  border-color: transparent;
-  box-shadow: 0 2px 8px rgba(41, 128, 185, 0.25);
-  transform: none;
+  border-color: #2980b9;
+  box-shadow: 0 4px 16px rgba(41, 128, 185, 0.4),
+              0 0 24px rgba(41, 128, 185, 0.2);
+  transform: scale(1.05);
 }
 
 .status-badge.cooling.active::before {
@@ -2808,11 +2989,13 @@ export default {
 }
 
 .status-badge.overload.active {
-  background: linear-gradient(135deg, #f39c12, #e67e22);
+  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
   color: #fff;
-  border-color: transparent;
-  box-shadow: 0 2px 8px rgba(243, 156, 18, 0.25);
-  transform: none;
+  border-color: #e67e22;
+  box-shadow: 0 4px 16px rgba(243, 156, 18, 0.4),
+              0 0 24px rgba(243, 156, 18, 0.2);
+  transform: scale(1.05);
+  animation: shake 0.5s infinite;
 }
 
 .status-badge.overload.active::before {
@@ -2820,11 +3003,13 @@ export default {
 }
 
 .status-badge.overtemp.active {
-  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
   color: #fff;
-  border-color: transparent;
-  box-shadow: 0 2px 8px rgba(231, 76, 60, 0.25);
-  transform: none;
+  border-color: #c0392b;
+  box-shadow: 0 4px 16px rgba(231, 76, 60, 0.4),
+              0 0 24px rgba(231, 76, 60, 0.2);
+  transform: scale(1.05);
+  animation: shake 0.5s infinite;
 }
 
 .status-badge.overtemp.active::before {
@@ -2832,11 +3017,13 @@ export default {
 }
 
 .status-badge.overspeed.active {
-  background: linear-gradient(135deg, #8e44ad, #6c5ce7);
+  background: linear-gradient(135deg, #8e44ad 0%, #6c5ce7 100%);
   color: #fff;
-  border-color: transparent;
-  box-shadow: 0 2px 8px rgba(108, 92, 231, 0.25);
-  transform: none;
+  border-color: #6c5ce7;
+  box-shadow: 0 4px 16px rgba(108, 92, 231, 0.4),
+              0 0 24px rgba(108, 92, 231, 0.2);
+  transform: scale(1.05);
+  animation: shake 0.5s infinite;
 }
 
 .status-badge.overspeed.active::before {
@@ -2850,60 +3037,125 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .system-control-panel {
-  padding: 5px;
+  padding: 24px;
 }
 
 .control-modules {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  align-content: start;
+  overflow-x: hidden;
+  padding: 0 4px 0 0;
+  /* 在滚动内容后添加额外空间，确保最后的内容完全可见 */
+}
+
+.control-modules::after {
+  content: '';
+  display: block;
+  height: 60px;
+  flex-shrink: 0;
+}
+
+/* 美化滚动条 */
+.control-modules::-webkit-scrollbar {
+  width: 5px;
+}
+
+.control-modules::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 10px;
+}
+
+.control-modules::-webkit-scrollbar-thumb {
+  background: rgba(118, 75, 162, 0.3);
+  border-radius: 10px;
+}
+
+.control-modules::-webkit-scrollbar-thumb:hover {
+  background: rgba(118, 75, 162, 0.5);
 }
 
 .control-module {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 10px;
+  padding: 12px;
+  background: linear-gradient(135deg, #fdfbfb 0%, #f7f9fc 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.control-module:hover {
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-1px);
 }
 
 .module-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: #333;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 3px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2d3748;
+  padding-bottom: 8px;
+  border-bottom: 1.5px solid #e2e8f0;
+  margin-bottom: 0;
+  position: relative;
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}
+
+.module-title::after {
+  content: '';
+  position: absolute;
+  bottom: -1.5px;
+  left: 0;
+  width: 35px;
+  height: 2.5px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 2px;
 }
 
 /* 模式切换样式 */
 .mode-switch {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 5px;
+  gap: 8px;
+  grid-auto-flow: dense;
+}
+
+/* 自动控制按钮跨越两列 */
+.mode-switch .auto-control-buttons {
+  grid-column: 1 / -1;
 }
 
 .mode-option {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  padding: 6px;
-  background: #f8fafc;
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  min-height: 100px;
 }
 
 .mode-option:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
 }
 
 .mode-option.clickable {
@@ -2912,88 +3164,100 @@ export default {
 }
 
 .mode-option.clickable:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.2);
   border-color: #667eea;
 }
 
 .mode-option.clickable:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .mode-option.active {
   border-color: #667eea;
-  background: rgba(102, 126, 234, 0.05);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.05) 100%);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25),
+              inset 0 1px 2px rgba(102, 126, 234, 0.1);
 }
 
 .mode-icon {
   color: #667eea;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
 }
 
 .mode-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #333;
+  font-size: 13px;
+  font-weight: 700;
+  color: #2d3748;
+  letter-spacing: -0.3px;
 }
 
 .mode-status {
-  font-size: 10px;
-  padding: 2px 6px;
-  border-radius: 12px;
-  font-weight: 500;
+  font-size: 11px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-weight: 600;
 }
 
 .mode-status.active {
-  background: rgba(46, 204, 113, 0.1);
-  color: #2ecc71;
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(39, 174, 96, 0.3);
 }
 
 .mode-status.inactive {
-  background: rgba(149, 165, 166, 0.1);
-  color: #95a5a6;
+  background: rgba(149, 165, 166, 0.15);
+  color: #64748b;
 }
 
 
 /* 手动操作样式 */
 .manual-controls {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 4px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  width: 100%;
 }
 
 .system-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid #e2e8f0;
-  border-radius: 5px;
-  padding: 6px;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .system-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
   border-color: #cbd5e0;
 }
 
 .system-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 5px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .system-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 5px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
   flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.system-card:hover .system-icon {
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .grating-system .system-icon {
@@ -3016,27 +3280,33 @@ export default {
   color: white;
 }
 
+.system-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
 .system-info {
   flex: 1;
 }
 
 .system-name {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: #2d3748;
-  margin: 0 0 1px 0;
+  margin: 0 0 2px 0;
+  letter-spacing: -0.3px;
 }
 
 .system-desc {
-  font-size: 9px;
+  font-size: 10px;
   color: #718096;
   margin: 0;
-  line-height: 1.2;
+  line-height: 1.3;
 }
 
 .control-buttons {
   display: flex;
-  gap: 5px;
+  gap: 6px;
 }
 
 .control-btn {
@@ -3044,26 +3314,35 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 6px 10px;
-  font-size: 11px;
+  padding: 8px 12px;
+  font-size: 12px;
   font-weight: 600;
-  border-radius: 5px;
-  transition: all 0.3s ease;
+  border-radius: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
   cursor: pointer;
   min-height: 32px;
+  min-width: 60px;
   flex: 1;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.control-btn svg {
+  width: 14px;
+  height: 14px;
 }
 
 .control-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
 .control-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
+  filter: grayscale(0.3);
 }
 
 /* 错误复位样式 */
@@ -3071,35 +3350,44 @@ export default {
 .alarm-confirm-controls {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 8px;
+  width: 100%;
 }
 
 .reset-info {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-  border-radius: 6px;
-  border: 1px solid #e2e8f0;
-  transition: all 0.3s ease;
+  gap: 8px;
+  padding: 10px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-radius: 8px;
+  border: 1.5px solid #e2e8f0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 .reset-info:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
+  border-color: #667eea;
 }
 
 .info-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 6px;
+  border-radius: 8px;
   color: white;
   flex-shrink: 0;
+  box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+}
+
+.info-icon svg {
+  width: 16px;
+  height: 16px;
 }
 
 .info-text {
@@ -3108,13 +3396,14 @@ export default {
 
 .info-title {
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   color: #2d3748;
   margin: 0 0 2px 0;
+  letter-spacing: -0.3px;
 }
 
 .info-desc {
-  font-size: 10px;
+  font-size: 11px;
   color: #718096;
   margin: 0;
   line-height: 1.3;
@@ -3165,7 +3454,7 @@ export default {
 .reset-buttons {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px;
 }
 
 .reset-btn {
@@ -3173,27 +3462,34 @@ export default {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 14px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
   border-radius: 6px;
   transition: all 0.15s ease;
-  border: 2px solid transparent;
+  border: 1.5px solid transparent;
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  min-height: 34px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  min-height: 36px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  letter-spacing: 0.2px;
+}
+
+.reset-btn svg {
+  width: 16px;
+  height: 16px;
 }
 
 .reset-btn:hover:not(:disabled) {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
 .reset-btn:disabled {
-  opacity: 0.5;
+  opacity: 0.6;
   cursor: not-allowed;
+  filter: grayscale(0.3);
 }
 
 .reset-btn.pressed {
@@ -3223,49 +3519,119 @@ export default {
 @media (max-width: 1200px) {
   .control-modules {
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 16px;
+  }
+  
+  .control-module {
+    padding: 16px;
   }
 }
 
 @media (max-width: 768px) {
   .mode-switch {
     grid-template-columns: 1fr;
-    gap: 6px;
+    gap: 12px;
   }
   
   .mode-option {
-    padding: 8px;
+    padding: 16px;
+  }
+  
+  .mode-icon {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .mode-label {
+    font-size: 14px;
   }
   
   .manual-controls {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .system-card {
+    padding: 12px;
+  }
+  
+  .system-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .system-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .system-name {
+    font-size: 14px;
+  }
+  
+  .system-desc {
+    font-size: 11px;
   }
   
   .control-buttons {
-    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .control-btn {
+    padding: 10px 12px;
+    font-size: 12px;
+    min-height: 38px;
+  }
+  
+  .control-btn svg {
+    width: 16px;
+    height: 16px;
   }
   
   .reset-buttons {
-    flex-direction: column;
+    gap: 8px;
   }
   
-  .motor-item {
-    padding: 8px;
+  .reset-btn {
+    padding: 12px 16px;
+    font-size: 13px;
+    min-height: 42px;
+  }
+  
+  .reset-btn svg {
+    width: 18px;
+    height: 18px;
   }
   
   .motor-item-header {
-    flex-wrap: wrap;
-    gap: 6px;
+    gap: 8px;
   }
   
   .motor-item-content {
     padding-left: 0;
-    margin-top: 6px;
   }
   
-  .motor-status-badges {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 4px;
+  .module-title {
+    font-size: 14px;
+    padding-bottom: 10px;
+  }
+  
+  .info-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .info-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .info-title {
+    font-size: 14px;
+  }
+  
+  .info-desc {
+    font-size: 12px;
   }
 }
 </style>
