@@ -71,7 +71,7 @@
           <line x1="8" y1="16" x2="16" y2="16" stroke="currentColor" stroke-width="2"/>
           <line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="2"/>
         </svg>
-        查询结果 ({{ queryResults.length }} 条记录)
+        查询结果 ({{ totalCount }} 条记录)
       </h3>
       <div class="results-content">
         <div class="table-container">
@@ -158,6 +158,7 @@ export default {
     })
 
     const queryResults = ref([])
+    const totalCount = ref(0) // 实际查询到的总记录数
 
     // 前端数据类型到后端 metric 的映射
     const dataTypeToMetric = {
@@ -283,6 +284,7 @@ export default {
 
         console.log('查询站点ID:', siteId, '站点代码:', siteCode)
         const allResults = []
+        let totalRecordsCount = 0 // 累加所有数据类型的实际记录数
 
         // 确定要查询的数据类型列表
         const dataTypesToQuery = queryParams.value.dataType === 'all' 
@@ -321,11 +323,16 @@ export default {
             }
 
             // 处理响应数据
-            // 后端返回格式: { success: true, data: { records: [...] } }
+            // 后端返回格式: { success: true, data: { dataCount: 实际记录数, records: [...] } }
             const responseData = response.data || response
-            const records = responseData.records || responseData.data?.records || []
+            const records = responseData.records || []
+            // 使用后端返回的 dataCount，如果没有则使用 records.length 作为后备
+            const dataCount = responseData.dataCount ?? records.length
             
-            console.log(`查询 ${dataType} (${metric}) 返回 ${records.length} 条数据`)
+            console.log(`查询 ${dataType} (${metric}) 返回 ${dataCount} 条数据 (实际记录数)`)
+            
+            // 累加实际记录数
+            totalRecordsCount += dataCount
             
             // 转换数据格式
             records.forEach((record, index) => {
@@ -348,15 +355,19 @@ export default {
         allResults.sort((a, b) => b.timestamp - a.timestamp)
         
         queryResults.value = allResults
+        totalCount.value = totalRecordsCount // 设置实际查询到的总记录数
         
         if (allResults.length === 0) {
           console.warn('未查询到任何数据，请检查查询条件或数据库中的数据')
         }
         
+        console.log(`查询完成: 总记录数=${totalRecordsCount}, 前端数组长度=${allResults.length}`)
+        
       } catch (error) {
         console.error('查询数据失败:', error)
         alert(`查询失败: ${error.message || '未知错误'}`)
         queryResults.value = []
+        totalCount.value = 0
       } finally {
         loading.value = false
       }
@@ -369,6 +380,7 @@ export default {
       // 清空之前的查询结果，提示用户重新查询
       if (queryExecuted.value && queryResults.value.length > 0) {
         queryResults.value = []
+        totalCount.value = 0
         queryExecuted.value = false
         currentPage.value = 1
         // 可选：显示提示信息
@@ -395,6 +407,7 @@ export default {
       queryExecuted,
       queryParams,
       queryResults,
+      totalCount,
       currentPage,
       totalPages,
       paginatedResults,
