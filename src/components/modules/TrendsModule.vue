@@ -129,25 +129,27 @@ export default {
       const rand = (i, base = 50) => base + Math.sin(i / 3) * 5 + (Math.random() - 0.5) * 2
 
       if (range === 'hourly24') {
-        // 当天00:00:00至今，每小时一个点
+        // 当天00:00:00至今，1分钟颗粒度，1440个数据点
         const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
         const end = new Date(now)
-        end.setMinutes(0, 0, 0) // 取整到当前小时
-        for (let t = new Date(start), i = 0; t <= end; t.setHours(t.getHours() + 1), i++) {
+        end.setSeconds(0, 0) // 取整到当前分钟
+        for (let t = new Date(start), i = 0; t <= end; t.setMinutes(t.getMinutes() + 1), i++) {
           values.push({ value: [new Date(t), rand(i)] })
         }
       } else if (range === 'dailyThisMonth') {
-        // 本月1日至今，每天一个点
+        // 本月1日至今，1小时一次，720个数据点（30天*24小时）
         const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
-        const end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
-        for (let t = new Date(start), i = 0; t <= end; t.setDate(t.getDate() + 1), i++) {
+        const end = new Date(now)
+        end.setMinutes(0, 0, 0) // 取整到当前小时
+        for (let t = new Date(start), i = 0; t <= end; t.setHours(t.getHours() + 1), i++) {
           values.push({ value: [new Date(t), rand(i, 55)] })
         }
       } else if (range === 'monthlyThisYear') {
-        // 今年1月1日至今，每月一个点
+        // 今年1月1日至今，1天一次，365个数据点
         const start = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0)
-        const end = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
-        for (let t = new Date(start), i = 0; t <= end; t.setMonth(t.getMonth() + 1), i++) {
+        const end = new Date(now)
+        end.setHours(0, 0, 0, 0) // 取整到当前天
+        for (let t = new Date(start), i = 0; t <= end; t.setDate(t.getDate() + 1), i++) {
           values.push({ value: [new Date(t), rand(i, 60)] })
         }
       }
@@ -156,7 +158,7 @@ export default {
 
     const getXAxisOptions = (range) => {
       if (range === 'hourly24') {
-        // 当天00:00:00至今
+        // 当天00:00:00至今，1分钟颗粒度
         const now = new Date()
         const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
         const end = new Date(now)
@@ -164,42 +166,53 @@ export default {
           type: 'time',
           min: start,
           max: end,
-          minInterval: 3600 * 1000,
-          splitNumber: 24,
+          minInterval: 60 * 1000, // 1分钟
+          splitNumber: 24, // 显示24个刻度（每小时一个）
           axisLabel: {
             color: '#666',
             margin: 10,
             formatter: (value) => {
               const d = new Date(value)
               const hh = String(d.getHours()).padStart(2, '0')
-              return `${hh}:00`
+              const mm = String(d.getMinutes()).padStart(2, '0')
+              return `${hh}:${mm}`
             }
           }
         }
       }
       if (range === 'dailyThisMonth') {
-        // 本月1日至今
+        // 本月1日至今，1小时一次
         const now = new Date()
         const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
         const end = new Date(now)
+        const daysDiff = Math.ceil((end - start) / (24 * 3600 * 1000))
         return {
           type: 'time',
           min: start,
           max: end,
-          minInterval: 24 * 3600 * 1000,
+          minInterval: 3600 * 1000, // 1小时
+          splitNumber: Math.min(daysDiff, 15), // 根据天数动态调整，最多15个刻度
           axisLabel: {
             color: '#666',
-            margin: 10,
+            margin: 12,
+            rotate: 45, // 旋转45度，避免重叠
+            interval: 0, // 自动计算间隔，避免重叠
             formatter: (value) => {
               const d = new Date(value)
               const mm = String(d.getMonth() + 1).padStart(2, '0')
               const dd = String(d.getDate()).padStart(2, '0')
-              return `${mm}-${dd}`
+              const hh = String(d.getHours()).padStart(2, '0')
+              // 如果是00:00，显示日期，否则显示时间
+              if (d.getHours() === 0) {
+                return `${mm}-${dd}`
+              } else {
+                return `${hh}:00`
+              }
             }
           }
         }
       }
-      // monthlyThisYear（今年1月1日至今，按月刻度）
+      // monthlyThisYear（今年1月1日至今，1天一次）
       const now = new Date()
       const start = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0)
       const end = new Date(now)
@@ -207,16 +220,16 @@ export default {
         type: 'time',
         min: start,
         max: end,
-        splitNumber: 12,
-        minInterval: 28 * 24 * 3600 * 1000,
-        maxInterval: 31 * 24 * 3600 * 1000,
+        minInterval: 24 * 3600 * 1000, // 1天
+        splitNumber: 12, // 显示12个刻度（每月一个）
         axisLabel: {
           color: '#666',
           margin: 10,
           formatter: (value) => {
             const d = new Date(value)
             const mm = String(d.getMonth() + 1).padStart(2, '0')
-            return `${mm}月`
+            const dd = String(d.getDate()).padStart(2, '0')
+            return `${mm}-${dd}`
           }
         }
       }
@@ -308,20 +321,20 @@ export default {
         let startTime, endTime, interval
 
         if (range === 'hourly24') {
-          // 当天00:00:00至今，小时聚合
+          // 当天00:00:00至今，1分钟颗粒度，1440个数据点
           startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
           endTime = new Date(now)
-          interval = 'hour'
+          interval = 'minute'
         } else if (range === 'dailyThisMonth') {
-          // 本月1日00:00:00至今，天聚合
+          // 本月1日00:00:00至今，1小时一次，720个数据点
           startTime = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
           endTime = new Date(now)
-          interval = 'day'
+          interval = 'hour'
         } else if (range === 'monthlyThisYear') {
-          // 今年1月1日00:00:00至今，月聚合
+          // 今年1月1日00:00:00至今，1天一次，365个数据点
           startTime = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0)
           endTime = new Date(now)
-          interval = 'month'
+          interval = 'day'
         }
 
         console.log('查询时间范围:', {
@@ -375,17 +388,20 @@ export default {
         let startTime, endTime, interval
 
         if (range === 'hourly24') {
+          // 1分钟颗粒度，1440个数据点
           startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
           endTime = new Date(now)
-          interval = 'hour'
+          interval = 'minute'
         } else if (range === 'dailyThisMonth') {
+          // 1小时一次，720个数据点
           startTime = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
           endTime = new Date(now)
-          interval = 'day'
+          interval = 'hour'
         } else if (range === 'monthlyThisYear') {
+          // 1天一次，365个数据点
           startTime = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0)
           endTime = new Date(now)
-          interval = 'month'
+          interval = 'day'
         }
 
         const response = await downstreamWaterLevelAPI.queryData(
@@ -608,14 +624,17 @@ export default {
       const now = new Date()
       let startTime, interval
       if (range === 'hourly24') {
+        // 1分钟颗粒度，1440个数据点
         startTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0)
-        interval = 'hour'
+        interval = 'minute'
       } else if (range === 'dailyThisMonth') {
+        // 1小时一次，720个数据点（30天*24小时）
         startTime = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0)
-        interval = 'day'
+        interval = 'hour'
       } else {
+        // 1天一次，365个数据点
         startTime = new Date(now.getFullYear(), 0, 1, 0, 0, 0, 0)
-        interval = 'month'
+        interval = 'day'
       }
       return { startTime, endTime: now, interval }
     }
