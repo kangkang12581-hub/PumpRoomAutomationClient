@@ -396,12 +396,12 @@
                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
                   </svg>
                   <span>{{ scaleData.isStable ? '稳定' : '不稳定' }}</span>
+                </div>
               </div>
-            </div>
               <div class="last-update">
                 最后更新: {{ scaleData.lastUpdate }}
-          </div>
-        </div>
+              </div>
+            </div>
 
             <!-- 重量数据网格 -->
             <div class="scale-data-grid">
@@ -413,13 +413,13 @@
                     <path d="M12 14V8" stroke="currentColor" stroke-width="2"/>
                     <circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="2"/>
                   </svg>
-      </div>
+                </div>
                 <div class="weight-info">
                   <div class="weight-label">毛重</div>
                   <div class="weight-value">{{ scaleData.grossWeight }} kg</div>
                   <div class="weight-status" :class="getScaleStatus(scaleData.grossWeight)">
                     {{ getScaleStatusText(scaleData.grossWeight) }}
-            </div>
+                  </div>
                 </div>
               </div>
 
@@ -3838,22 +3838,43 @@ export default {
 
 .scale-data-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 1200px) {
+  .scale-data-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .scale-data-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
 }
 
 .weight-item {
   display: flex;
   align-items: center;
-  gap: 20px;
-  padding: 24px;
+  gap: 16px;
+  padding: 20px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
-  border-radius: 16px;
+  border-radius: 12px;
   border: 1px solid rgba(102, 126, 234, 0.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-height: 100px;
+}
+
+@media (max-width: 768px) {
+  .weight-item {
+    padding: 16px;
+    gap: 12px;
+  }
 }
 
 .weight-item::before {
@@ -3894,10 +3915,17 @@ export default {
 }
 
 .weight-value {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 700;
   color: #333;
   margin-bottom: 4px;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .weight-value {
+    font-size: 18px;
+  }
 }
 
 .weight-status {
@@ -3946,7 +3974,8 @@ export default {
   }
   
   .scale-data-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
   
   .scale-controls-section .control-buttons {
@@ -3956,12 +3985,6 @@ export default {
   
   .scale-controls-section .control-btn {
     width: 100%;
-  }
-}
-
-@media (max-width: 320px) {
-  .scale-data-grid {
-    grid-template-columns: 1fr;
   }
 }
 

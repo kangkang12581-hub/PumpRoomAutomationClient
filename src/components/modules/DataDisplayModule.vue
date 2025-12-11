@@ -282,12 +282,12 @@
                     <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
                   </svg>
                   <span>{{ scaleData.isStable ? '稳定' : '不稳定' }}</span>
+                </div>
               </div>
-            </div>
               <div class="last-update">
                 最后更新: {{ scaleData.lastUpdate }}
-          </div>
-        </div>
+              </div>
+            </div>
 
             <!-- 重量数据网格 -->
             <div class="scale-data-grid">
@@ -299,13 +299,13 @@
                     <path d="M12 14V8" stroke="currentColor" stroke-width="2"/>
                     <circle cx="12" cy="8" r="2" stroke="currentColor" stroke-width="2"/>
                   </svg>
-      </div>
+                </div>
                 <div class="weight-info">
                   <div class="weight-label">毛重</div>
                   <div class="weight-value">{{ scaleData.grossWeight }} kg</div>
                   <div class="weight-status" :class="getScaleStatus(scaleData.grossWeight)">
                     {{ getScaleStatusText(scaleData.grossWeight) }}
-            </div>
+                  </div>
                 </div>
               </div>
 
@@ -2871,6 +2871,8 @@ export default {
   gap: 5px;
   flex: 1;
   min-height: 0;
+  overflow: visible;
+  height: 100%;
 }
 
 .scale-status-section {
@@ -2916,6 +2918,21 @@ export default {
   grid-template-columns: repeat(2, 1fr);
   gap: 5px;
   flex: 1;
+  min-height: 0;
+  overflow: visible;
+}
+
+@media (min-width: 1200px) {
+  .scale-data-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .scale-data-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
 }
 
 .weight-item {
@@ -2930,6 +2947,14 @@ export default {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-height: 60px;
+}
+
+@media (max-width: 768px) {
+  .weight-item {
+    padding: 5px;
+    gap: 5px;
+  }
 }
 
 .weight-item::before {
@@ -2974,6 +2999,13 @@ export default {
   font-weight: 700;
   color: #333;
   margin-bottom: 2px;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .weight-value {
+    font-size: 12px;
+  }
 }
 
 .weight-status {
@@ -3022,7 +3054,8 @@ export default {
   }
   
   .scale-data-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: 1fr;
+    gap: 4px;
   }
   
   .scale-controls-section .control-buttons {
@@ -3032,12 +3065,6 @@ export default {
   
   .scale-controls-section .control-btn {
     width: 100%;
-  }
-}
-
-@media (max-width: 320px) {
-  .scale-data-grid {
-    grid-template-columns: 1fr;
   }
 }
 
