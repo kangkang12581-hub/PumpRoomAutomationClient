@@ -1636,7 +1636,7 @@ export default {
 .data-display-module {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: auto auto;
+  grid-template-rows: 1fr 1fr;
   gap: 6px;
   padding: 6px;
   background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
@@ -1735,7 +1735,32 @@ export default {
   color: #666;
   flex: 1;
   min-height: 0;
-  overflow: visible;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 称台监控模块的 panel-content 需要更多空间 */
+.scale-section {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  grid-column: 1 / 3;
+  grid-row: 2;
+  height: 100%;
+}
+
+.scale-section .panel-content {
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1;
+  padding-bottom: 10px;
+}
+
+.scale-section .motor-panel {
+  height: 100%;
   display: flex;
   flex-direction: column;
 }
@@ -1835,6 +1860,21 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 0;
+}
+
+/* 运行参数区域 */
+.motor-section {
+  grid-column: 3;
+  grid-row: 1 / 3;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* 运行参数模块的 panel-content 移除滚动条 */
+.motor-section .panel-content {
+  overflow-y: visible;
+  overflow-x: hidden;
 }
 
 /* 水流数据样式 */
@@ -2028,6 +2068,9 @@ export default {
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
   flex: 1;
+  min-height: 0;
+  overflow: visible;
+  align-content: start;
 }
 
 .motor-params-grid .param-item {
@@ -2872,7 +2915,8 @@ export default {
   flex: 1;
   min-height: 0;
   overflow: visible;
-  height: 100%;
+  height: auto;
+  padding-bottom: 10px;
 }
 
 .scale-status-section {
@@ -2915,16 +2959,30 @@ export default {
 
 .scale-data-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 5px;
   flex: 1;
   min-height: 0;
   overflow: visible;
+  align-content: start;
+  grid-auto-rows: minmax(60px, auto);
+}
+
+/* 所有项目横向排布 */
+.scale-data-grid .weight-item {
+  grid-column: span 1;
 }
 
 @media (min-width: 1200px) {
   .scale-data-grid {
     grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 1400px) {
+  .scale-data-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
   }
 }
 
@@ -2938,8 +2996,8 @@ export default {
 .weight-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px;
+  gap: 8px;
+  padding: 8px 10px;
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border-radius: 5px;
   border: 1px solid rgba(102, 126, 234, 0.1);
@@ -2947,7 +3005,8 @@ export default {
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
-  min-height: 60px;
+  min-height: 65px;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -2982,29 +3041,40 @@ export default {
 .weight-icon {
   flex-shrink: 0;
   color: #9b59b6;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .weight-info {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .weight-label {
-  font-size: 11px;
+  font-size: 12px;
   color: #666;
-  margin-bottom: 3px;
+  margin-bottom: 4px;
+  font-weight: 500;
 }
 
 .weight-value {
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 700;
   color: #333;
   margin-bottom: 2px;
   word-break: break-word;
+  line-height: 1.2;
 }
 
 @media (max-width: 768px) {
   .weight-value {
-    font-size: 12px;
+    font-size: 14px;
   }
 }
 
