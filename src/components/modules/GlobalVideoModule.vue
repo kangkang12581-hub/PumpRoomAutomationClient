@@ -12,14 +12,27 @@
           >
             {{ loading ? '连接中...' : '启动监控' }}
           </button>
-          <button 
-            v-else 
-            @click="stopStream" 
-            class="btn btn-secondary btn-sm"
-          >
-            停止监控
-          </button>
-          
+          <template v-else>
+            <button 
+              @click="captureSnapshot" 
+              class="btn btn-outline btn-sm"
+              :disabled="snapshotLoading"
+              title="截图保存"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 4px; vertical-align: middle;">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+              {{ snapshotLoading ? '截图中...' : '快照' }}
+            </button>
+            <button 
+              @click="stopStream" 
+              class="btn btn-secondary btn-sm"
+            >
+              停止监控
+            </button>
+          </template>
         </div>
       </h3>
       
@@ -108,6 +121,7 @@ export default {
     // MJPEG 直拉地址
     const mjpegUrl = ref('')
     const currentTime = ref('')
+    const snapshotLoading = ref(false)
     
     // 定时器
     let timeInterval = null
@@ -360,6 +374,57 @@ export default {
       if (errorMessage.value.includes('视频流连接中断')) errorMessage.value = ''
     }
     
+    // 快照功能：截图并保存到本地
+    const captureSnapshot = async () => {
+      if (!isStreaming.value) {
+        errorMessage.value = '请先启动视频流'
+        return
+      }
+      
+      snapshotLoading.value = true
+      try {
+        // 调用后端快照接口
+        const snapshotUrl = BACKEND_BASE ? `${BACKEND_BASE}/api/stream/snapshot` : '/api/stream/snapshot'
+        const response = await fetch(snapshotUrl, {
+          method: 'GET',
+          headers: {
+            'Accept': 'image/jpeg'
+          }
+        })
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: '获取快照失败' }))
+          throw new Error(errorData.error || errorData.message || `获取快照失败 (${response.status})`)
+        }
+        
+        // 获取图片数据
+        const blob = await response.blob()
+        
+        // 生成文件名：摄像头类型_时间戳.jpg
+        const cameraTypeLabel = props.cameraType === 'internal' ? '机内视频' : '全局视频'
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5)
+        const filename = `${cameraTypeLabel}_${timestamp}.jpg`
+        
+        // 创建下载链接并触发下载
+        const url = window.URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = filename
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+        
+        // 显示成功消息（可选）
+        console.log(`快照已保存: ${filename}`)
+      } catch (error) {
+        console.error('快照失败:', error)
+        errorMessage.value = `快照失败: ${error.message || '未知错误'}`
+      } finally {
+        snapshotLoading.value = false
+      }
+    }
+    
     onMounted(() => {})
     onUnmounted(() => { if (isStreaming.value) { stopStream() } })
 
@@ -369,9 +434,11 @@ export default {
       errorMessage,
       cameraInfo,
       currentTime,
+      snapshotLoading,
       clearError,
       startStream,
       stopStream,
+      captureSnapshot,
       handleStreamError,
       handleStreamLoad,
       videoEl,
@@ -459,6 +526,11 @@ export default {
 .btn-outline:hover:not(:disabled) {
   background: #667eea;
   color: white;
+}
+
+.btn-outline svg {
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .btn-sm {
