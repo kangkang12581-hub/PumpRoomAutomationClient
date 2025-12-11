@@ -126,13 +126,6 @@
           <div class="nav-section">
             <h3 class="nav-section-title">系统监控</h3>
             <ul class="nav-menu">
-              <li class="nav-item" :class="{ active: activeModule === 'operation' }" @click="setActiveModule('operation')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
-                  <path d="M19.4 15A9 9 0 0 0 19.4 9M20.85 19.1A13 13 0 0 0 20.85 4.9M4.6 15A9 9 0 0 1 4.6 9M3.15 19.1A13 13 0 0 1 3.15 4.9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <span>操作</span>
-              </li>
               <li class="nav-item" :class="{ active: activeModule === 'motor-control' }" @click="setActiveModule('motor-control')">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
                   <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2"/>
@@ -260,7 +253,6 @@ import { useRouter } from 'vue-router'
 import { authAPI, siteAssignmentAPI, opcuaAPI } from '@/services/api'
 import { setCurrentSite, getCurrentSiteCode } from '@/utils/siteManager'
 // 导入各个功能模块组件
-import OperationModule from '../components/modules/OperationModule.vue'
 import MotorControlModule from '../components/modules/MotorControlModule.vue'
 import DataDisplayModule from '../components/modules/DataDisplayModule.vue'
 import TrendsModule from '../components/modules/TrendsModule.vue'
@@ -274,7 +266,6 @@ import UserManagementModule from '../components/modules/UserManagementModule.vue
 export default {
   name: 'Dashboard',
   components: {
-    OperationModule,
     MotorControlModule,
     DataDisplayModule,
     TrendsModule,
@@ -307,7 +298,7 @@ export default {
       return current ? current.isOnline : false
     })
     const currentTime = ref('')
-    const activeModule = ref('operation')
+    const activeModule = ref('motor-control')
     const deviceMode = ref({
       isRemote: false,
       mode: 'local',
@@ -319,7 +310,6 @@ export default {
 
     // 模块标题映射
     const moduleTitles = {
-      operation: '操作',
       'motor-control': '电机控制',
       'data-display': '数据展示',
       trends: '趋势曲线',
@@ -365,7 +355,7 @@ export default {
 
     // 获取模块标题
     const getModuleTitle = () => {
-      return moduleTitles[activeModule.value] || '操作'
+      return moduleTitles[activeModule.value] || '电机控制'
     }
 
     // 获取视频模块标题
@@ -391,7 +381,6 @@ export default {
     // 获取活跃组件
     const getActiveComponent = () => {
       const componentMap = {
-        operation: 'OperationModule',
         'motor-control': 'MotorControlModule',
         'data-display': 'DataDisplayModule',
         trends: 'TrendsModule',
@@ -405,9 +394,9 @@ export default {
       }
       // 权限检查：只有 root 和 admin 可以访问报警配置和用户管理
       if ((activeModule.value === 'user-management' || activeModule.value === 'alarm-config') && !isAdminOrRoot.value) {
-        return 'OperationModule'
+        return 'MotorControlModule'
       }
-      return componentMap[activeModule.value] || 'OperationModule'
+      return componentMap[activeModule.value] || 'MotorControlModule'
     }
 
     // 退出登录
