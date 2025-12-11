@@ -8,47 +8,119 @@
           <div class="form-row">
             <div class="form-group">
               <label>速度上限 (m/min)</label>
-              <input v-model.number="speedParams.maxSpeed" :disabled="!canEdit('maxSpeed')" type="number" step="0.1" class="input-field" />
+              <input 
+                v-model.number="speedParams.maxSpeed" 
+                :disabled="!canEdit('maxSpeed')" 
+                type="number" 
+                step="0.1" 
+                class="input-field"
+                @blur="handleParameterChange('speedParams.maxSpeed', $event.target._oldValue, speedParams.maxSpeed)"
+                @focus="$event.target._oldValue = speedParams.maxSpeed"
+              />
             </div>
             <div class="form-group">
               <label>速度下限 (m/min)</label>
-              <input v-model.number="speedParams.minSpeed" :disabled="!canEdit('minSpeed')" type="number" step="0.1" class="input-field" />
+              <input 
+                v-model.number="speedParams.minSpeed" 
+                :disabled="!canEdit('minSpeed')" 
+                type="number" 
+                step="0.1" 
+                class="input-field"
+                @blur="handleParameterChange('speedParams.minSpeed', $event.target._oldValue, speedParams.minSpeed)"
+                @focus="$event.target._oldValue = speedParams.minSpeed"
+              />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label>手动速度 (m/min)</label>
-              <input v-model.number="speedParams.manualSpeed" :disabled="!canEdit('manualSpeed')" type="number" step="0.1" class="input-field" />
+              <input 
+                v-model.number="speedParams.manualSpeed" 
+                :disabled="!canEdit('manualSpeed')" 
+                type="number" 
+                step="0.1" 
+                class="input-field"
+                @blur="handleParameterChange('speedParams.manualSpeed', $event.target._oldValue, speedParams.manualSpeed)"
+                @focus="$event.target._oldValue = speedParams.manualSpeed"
+              />
             </div>
             <div class="form-group">
               <label>报警速度 (m/min)</label>
-              <input v-model.number="speedParams.alarmSpeed" :disabled="!canEdit('alarmSpeed')" type="number" step="0.1" class="input-field" />
+              <input 
+                v-model.number="speedParams.alarmSpeed" 
+                :disabled="!canEdit('alarmSpeed')" 
+                type="number" 
+                step="0.1" 
+                class="input-field"
+                @blur="handleParameterChange('speedParams.alarmSpeed', $event.target._oldValue, speedParams.alarmSpeed)"
+                @focus="$event.target._oldValue = speedParams.alarmSpeed"
+              />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label>液位差 (cm)</label>
-              <input v-model.number="speedParams.levelDifference" :disabled="!canEdit('levelDifference')" type="number" step="0.1" class="input-field" />
+              <input 
+                v-model.number="speedParams.levelDifference" 
+                :disabled="!canEdit('levelDifference')" 
+                type="number" 
+                step="0.1" 
+                class="input-field"
+                @blur="handleParameterChange('speedParams.levelDifference', $event.target._oldValue, speedParams.levelDifference)"
+                @focus="$event.target._oldValue = speedParams.levelDifference"
+              />
             </div>
             <div class="form-group">
               <label>液位上限 (cm)</label>
-              <input v-model.number="speedParams.levelMax" :disabled="!canEdit('levelMax')" type="number" step="0.1" class="input-field" />
+              <input 
+                v-model.number="speedParams.levelMax" 
+                :disabled="!canEdit('levelMax')" 
+                type="number" 
+                step="0.1" 
+                class="input-field"
+                @blur="handleParameterChange('speedParams.levelMax', $event.target._oldValue, speedParams.levelMax)"
+                @focus="$event.target._oldValue = speedParams.levelMax"
+              />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label>调速P</label>
-              <input v-model.number="speedParams.controlP" :disabled="!canEdit('controlP')" type="number" step="0.01" class="input-field" />
+              <input 
+                v-model.number="speedParams.controlP" 
+                :disabled="!canEdit('controlP')" 
+                type="number" 
+                step="0.01" 
+                class="input-field"
+                @blur="handleParameterChange('speedParams.controlP', $event.target._oldValue, speedParams.controlP)"
+                @focus="$event.target._oldValue = speedParams.controlP"
+              />
             </div>
             <div class="form-group">
               <label>调速I</label>
-              <input v-model.number="speedParams.controlI" :disabled="!canEdit('controlI')" type="number" step="0.01" class="input-field" />
+              <input 
+                v-model.number="speedParams.controlI" 
+                :disabled="!canEdit('controlI')" 
+                type="number" 
+                step="0.01" 
+                class="input-field"
+                @blur="handleParameterChange('speedParams.controlI', $event.target._oldValue, speedParams.controlI)"
+                @focus="$event.target._oldValue = speedParams.controlI"
+              />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label>调速D</label>
-              <input v-model.number="speedParams.controlD" :disabled="!canEdit('controlD')" type="number" step="0.01" class="input-field" />
+              <input 
+                v-model.number="speedParams.controlD" 
+                :disabled="!canEdit('controlD')" 
+                type="number" 
+                step="0.01" 
+                class="input-field"
+                @blur="handleParameterChange('speedParams.controlD', $event.target._oldValue, speedParams.controlD)"
+                @focus="$event.target._oldValue = speedParams.controlD"
+              />
             </div>
             <div class="form-group">
               <!-- 空占位 -->
@@ -64,17 +136,44 @@
           <div class="form-row">
             <div class="form-group">
               <label>开始加热温度 (°C)</label>
-              <input v-model.number="heatingParams.startTemp" :disabled="!isRootOrAdmin" type="number" step="0.1" class="input-field" placeholder="5" />
+              <input 
+                v-model.number="heatingParams.startTemp" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                step="0.1" 
+                class="input-field" 
+                placeholder="5"
+                @blur="handleParameterChange('heatingParams.startTemp', $event.target._oldValue, heatingParams.startTemp)"
+                @focus="$event.target._oldValue = heatingParams.startTemp"
+              />
             </div>
             <div class="form-group">
               <label>停止加热温度 (°C)</label>
-              <input v-model.number="heatingParams.stopTemp" :disabled="!isRootOrAdmin" type="number" step="0.1" class="input-field" placeholder="15" />
+              <input 
+                v-model.number="heatingParams.stopTemp" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                step="0.1" 
+                class="input-field" 
+                placeholder="15"
+                @blur="handleParameterChange('heatingParams.stopTemp', $event.target._oldValue, heatingParams.stopTemp)"
+                @focus="$event.target._oldValue = heatingParams.stopTemp"
+              />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label>报警温度 (°C)</label>
-              <input v-model.number="heatingParams.alarmTemp" :disabled="!isRootOrAdmin" type="number" step="0.1" class="input-field" placeholder="80" />
+              <input 
+                v-model.number="heatingParams.alarmTemp" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                step="0.1" 
+                class="input-field" 
+                placeholder="80"
+                @blur="handleParameterChange('heatingParams.alarmTemp', $event.target._oldValue, heatingParams.alarmTemp)"
+                @focus="$event.target._oldValue = heatingParams.alarmTemp"
+              />
             </div>
             <div class="form-group">
               <label>绕组加热状态</label>
@@ -103,11 +202,27 @@
           <div class="form-row">
             <div class="form-group">
               <label>运行延时 (s)</label>
-              <input v-model.number="delayParams.startDelay" :disabled="!isRootOrAdmin" type="number" class="input-field" placeholder="30" />
+              <input 
+                v-model.number="delayParams.startDelay" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                class="input-field" 
+                placeholder="30"
+                @blur="handleParameterChange('delayParams.startDelay', $event.target._oldValue, delayParams.startDelay)"
+                @focus="$event.target._oldValue = delayParams.startDelay"
+              />
             </div>
             <div class="form-group">
               <label>停止延时 (min)</label>
-              <input v-model.number="delayParams.stopDelay" :disabled="!isRootOrAdmin" type="number" class="input-field" placeholder="1" />
+              <input 
+                v-model.number="delayParams.stopDelay" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                class="input-field" 
+                placeholder="1"
+                @blur="handleParameterChange('delayParams.stopDelay', $event.target._oldValue, delayParams.stopDelay)"
+                @focus="$event.target._oldValue = delayParams.stopDelay"
+              />
             </div>
           </div>
         </div>
@@ -120,11 +235,29 @@
           <div class="form-row">
             <div class="form-group">
               <label>开始散热温度 (°C)</label>
-              <input v-model.number="coolingParams.startTemp" :disabled="!isRootOrAdmin" type="number" step="0.1" class="input-field" placeholder="80" />
+              <input 
+                v-model.number="coolingParams.startTemp" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                step="0.1" 
+                class="input-field" 
+                placeholder="80"
+                @blur="handleParameterChange('coolingParams.startTemp', $event.target._oldValue, coolingParams.startTemp)"
+                @focus="$event.target._oldValue = coolingParams.startTemp"
+              />
             </div>
             <div class="form-group">
               <label>停止散热温度 (°C)</label>
-              <input v-model.number="coolingParams.stopTemp" :disabled="!isRootOrAdmin" type="number" step="0.1" class="input-field" placeholder="70" />
+              <input 
+                v-model.number="coolingParams.stopTemp" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                step="0.1" 
+                class="input-field" 
+                placeholder="70"
+                @blur="handleParameterChange('coolingParams.stopTemp', $event.target._oldValue, coolingParams.stopTemp)"
+                @focus="$event.target._oldValue = coolingParams.stopTemp"
+              />
             </div>
           </div>
         </div>
@@ -137,17 +270,44 @@
           <div class="form-row">
             <div class="form-group">
               <label>报警液位差 (cm)</label>
-              <input v-model.number="fluidParams.alarmLevelDiff" :disabled="!isRootOrAdmin" type="number" step="0.1" class="input-field" placeholder="50" />
+              <input 
+                v-model.number="fluidParams.alarmLevelDiff" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                step="0.1" 
+                class="input-field" 
+                placeholder="50"
+                @blur="handleParameterChange('fluidParams.alarmLevelDiff', $event.target._oldValue, fluidParams.alarmLevelDiff)"
+                @focus="$event.target._oldValue = fluidParams.alarmLevelDiff"
+              />
             </div>
             <div class="form-group">
               <label>报警液位 (cm)</label>
-              <input v-model.number="fluidParams.alarmLevel" :disabled="!isRootOrAdmin" type="number" step="0.1" class="input-field" placeholder="200" />
+              <input 
+                v-model.number="fluidParams.alarmLevel" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                step="0.1" 
+                class="input-field" 
+                placeholder="200"
+                @blur="handleParameterChange('fluidParams.alarmLevel', $event.target._oldValue, fluidParams.alarmLevel)"
+                @focus="$event.target._oldValue = fluidParams.alarmLevel"
+              />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label>报警流量 (m³/h)</label>
-              <input v-model.number="fluidParams.alarmFlow" :disabled="!isRootOrAdmin" type="number" step="0.1" class="input-field" placeholder="100" />
+              <input 
+                v-model.number="fluidParams.alarmFlow" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                step="0.1" 
+                class="input-field" 
+                placeholder="100"
+                @blur="handleParameterChange('fluidParams.alarmFlow', $event.target._oldValue, fluidParams.alarmFlow)"
+                @focus="$event.target._oldValue = fluidParams.alarmFlow"
+              />
             </div>
           </div>
         </div>
@@ -187,17 +347,44 @@
           <div class="form-row">
             <div class="form-group">
               <label>容器重量 (kg)</label>
-              <input v-model.number="containerParams.weight" :disabled="!isRootOrAdmin" type="number" step="0.1" class="input-field" placeholder="1000" />
+              <input 
+                v-model.number="containerParams.weight" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                step="0.1" 
+                class="input-field" 
+                placeholder="1000"
+                @blur="handleParameterChange('containerParams.weight', $event.target._oldValue, containerParams.weight)"
+                @focus="$event.target._oldValue = containerParams.weight"
+              />
             </div>
             <div class="form-group">
               <label>警示重量 (kg)</label>
-              <input v-model.number="containerParams.warningWeight" :disabled="!isRootOrAdmin" type="number" step="0.1" class="input-field" placeholder="800" />
+              <input 
+                v-model.number="containerParams.warningWeight" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                step="0.1" 
+                class="input-field" 
+                placeholder="800"
+                @blur="handleParameterChange('containerParams.warningWeight', $event.target._oldValue, containerParams.warningWeight)"
+                @focus="$event.target._oldValue = containerParams.warningWeight"
+              />
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label>报警重量 (kg)</label>
-              <input v-model.number="containerParams.alarmWeight" :disabled="!isRootOrAdmin" type="number" step="0.1" class="input-field" placeholder="500" />
+              <input 
+                v-model.number="containerParams.alarmWeight" 
+                :disabled="!isRootOrAdmin" 
+                type="number" 
+                step="0.1" 
+                class="input-field" 
+                placeholder="500"
+                @blur="handleParameterChange('containerParams.alarmWeight', $event.target._oldValue, containerParams.alarmWeight)"
+                @focus="$event.target._oldValue = containerParams.alarmWeight"
+              />
             </div>
             <div class="form-group">
               <!-- 空占位 -->
@@ -242,6 +429,49 @@
           </svg>
           {{ loading ? '保存中...' : '保存所有参数' }}
         </button>
+      </div>
+    </div>
+
+    <!-- 参数修改确认对话框 -->
+    <div v-if="showConfirmDialog" class="dialog-overlay" @click="cancelParameterChange">
+      <div class="dialog-content parameter-confirm-dialog" @click.stop>
+        <h3 class="dialog-title">确认修改参数</h3>
+        <div class="dialog-form">
+          <div class="parameter-info">
+            <div class="info-row">
+              <span class="info-label">参数名称：</span>
+              <span class="info-value">{{ pendingParameter?.label }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">当前值：</span>
+              <span class="info-value old-value">{{ pendingParameter?.oldValue }}{{ pendingParameter?.unit }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">新值：</span>
+              <input 
+                v-model.number="pendingParameter.newValue" 
+                type="number" 
+                :step="pendingParameter?.unit === '°C' || pendingParameter?.unit === 'cm' || pendingParameter?.unit === 'm/min' || pendingParameter?.unit === 'm³/h' || pendingParameter?.unit === 'kg' ? '0.1' : (pendingParameter?.unit === '' ? '0.01' : '1')"
+                class="confirm-input"
+              />
+              <span class="info-unit">{{ pendingParameter?.unit }}</span>
+            </div>
+            <div class="info-row">
+              <span class="info-label">站点：</span>
+              <span class="info-value">{{ currentSiteCode || '未选择' }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="dialog-actions">
+          <button 
+            @click="confirmWriteParameter" 
+            class="btn primary" 
+            :disabled="isWriting || !pendingParameter"
+          >
+            {{ isWriting ? '写入中...' : '确认写入' }}
+          </button>
+          <button @click="cancelParameterChange" class="btn secondary" :disabled="isWriting">取消</button>
+        </div>
       </div>
     </div>
   </div>
@@ -334,6 +564,11 @@ export default {
     const alarmTestSending = ref(false)
     const alarmTestPendingState = ref(null)
 
+    // 参数修改确认对话框相关状态
+    const showConfirmDialog = ref(false)
+    const pendingParameter = ref(null) // { label, paramKey, paramGroup, oldValue, newValue, nodeId, type, unit }
+    const isWriting = ref(false)
+
     // OPC UA 节点映射（与 OpcuaClient/nodes.json 保持一致）
     const opcNodes = {
       setVelocityHighLimit: 'ns=4;s=|var|Inovance-ARM-Linux.Application.GVL_HMI.GHr_setVelocityHighLimit',
@@ -358,6 +593,172 @@ export default {
       setWarnWeight: 'ns=4;s=|var|Inovance-ARM-Linux.Application.GVL_HMI.Ghr_setWarnWeight',
       setAlarmNetWeight: 'ns=4;s=|var|Inovance-ARM-Linux.Application.GVL_HMI.Ghr_setAlarmNetWeight',
       hartEn: 'ns=4;s=|var|Inovance-ARM-Linux.Application.GVL_HMI.GHb_hartEn'
+    }
+
+    // 参数到节点ID的映射
+    const parameterNodeMap = {
+      // 速度参数
+      'speedParams.maxSpeed': { nodeId: opcNodes.setVelocityHighLimit, type: 'Float', unit: 'm/min' },
+      'speedParams.minSpeed': { nodeId: opcNodes.setVelocityLowLimit, type: 'Float', unit: 'm/min' },
+      'speedParams.manualSpeed': { nodeId: opcNodes.setMVelocity, type: 'Float', unit: 'm/min' },
+      'speedParams.alarmSpeed': { nodeId: opcNodes.setVelocityAlm, type: 'Float', unit: 'm/min' },
+      'speedParams.levelDifference': { nodeId: opcNodes.setLiquidLevelDiff, type: 'Float', unit: 'cm' },
+      'speedParams.levelMax': { nodeId: opcNodes.almLevelDopplerHigh, type: 'Float', unit: 'cm' },
+      'speedParams.controlP': { nodeId: opcNodes.setP, type: 'Float', unit: '' },
+      'speedParams.controlI': { nodeId: opcNodes.setI, type: 'Float', unit: '' },
+      'speedParams.controlD': { nodeId: opcNodes.setD, type: 'Float', unit: '' },
+      // 绕组加热参数
+      'heatingParams.startTemp': { nodeId: opcNodes.motorColiHeatTemp, type: 'Float', unit: '°C' },
+      'heatingParams.stopTemp': { nodeId: opcNodes.motorColiStopTemp, type: 'Float', unit: '°C' },
+      'heatingParams.alarmTemp': { nodeId: opcNodes.motorColiAlmTemp, type: 'Float', unit: '°C' },
+      // 延时参数
+      'delayParams.startDelay': { nodeId: opcNodes.pumpRunTime, type: 'Float', unit: 's', transform: (v) => v * 1000 }, // 秒转毫秒
+      'delayParams.stopDelay': { nodeId: opcNodes.pumpStopTime, type: 'Float', unit: 'min', transform: (v) => v * 60000 }, // 分钟转毫秒
+      // 电机散热参数
+      'coolingParams.startTemp': { nodeId: opcNodes.motorColiCoolStartTemp, type: 'Float', unit: '°C' },
+      'coolingParams.stopTemp': { nodeId: opcNodes.motorColiCoolStopTemp, type: 'Float', unit: '°C' },
+      // 流体参数
+      'fluidParams.alarmLevelDiff': { nodeId: opcNodes.almLevelDiff, type: 'Float', unit: 'cm' },
+      'fluidParams.alarmLevel': { nodeId: opcNodes.almLevelDopplerHigh, type: 'Float', unit: 'cm' },
+      'fluidParams.alarmFlow': { nodeId: opcNodes.almFlowLow, type: 'Float', unit: 'm³/h' },
+      // 容器重量参数
+      'containerParams.weight': { nodeId: opcNodes.setMaxTareWeight, type: 'Float', unit: 'kg' },
+      'containerParams.warningWeight': { nodeId: opcNodes.setWarnWeight, type: 'Float', unit: 'kg' },
+      'containerParams.alarmWeight': { nodeId: opcNodes.setAlarmNetWeight, type: 'Float', unit: 'kg' }
+    }
+
+    // 参数标签映射
+    const parameterLabelMap = {
+      'speedParams.maxSpeed': '速度上限',
+      'speedParams.minSpeed': '速度下限',
+      'speedParams.manualSpeed': '手动速度',
+      'speedParams.alarmSpeed': '报警速度',
+      'speedParams.levelDifference': '液位差',
+      'speedParams.levelMax': '液位上限',
+      'speedParams.controlP': '调速P',
+      'speedParams.controlI': '调速I',
+      'speedParams.controlD': '调速D',
+      'heatingParams.startTemp': '开始加热温度',
+      'heatingParams.stopTemp': '停止加热温度',
+      'heatingParams.alarmTemp': '报警温度',
+      'delayParams.startDelay': '运行延时',
+      'delayParams.stopDelay': '停止延时',
+      'coolingParams.startTemp': '开始散热温度',
+      'coolingParams.stopTemp': '停止散热温度',
+      'fluidParams.alarmLevelDiff': '报警液位差',
+      'fluidParams.alarmLevel': '报警液位',
+      'fluidParams.alarmFlow': '报警流量',
+      'containerParams.weight': '容器重量',
+      'containerParams.warningWeight': '警示重量',
+      'containerParams.alarmWeight': '报警重量'
+    }
+
+    // 处理参数值变化
+    const handleParameterChange = (paramKey, oldValue, newValue) => {
+      // 如果值没有实际变化，不触发对话框
+      if (oldValue === newValue || (oldValue == null && newValue == null)) {
+        return
+      }
+
+      // 检查是否有权限编辑
+      const paramGroup = paramKey.split('.')[0]
+      const fieldKey = paramKey.split('.')[1]
+      if (!canEdit(fieldKey) && !isRootOrAdmin.value) {
+        return
+      }
+
+      // 获取参数配置
+      const config = parameterNodeMap[paramKey]
+      if (!config) {
+        console.warn(`未找到参数 ${paramKey} 的节点配置`)
+        return
+      }
+
+      // 显示确认对话框
+      pendingParameter.value = {
+        label: parameterLabelMap[paramKey] || paramKey,
+        paramKey,
+        oldValue,
+        newValue,
+        nodeId: config.nodeId,
+        type: config.type,
+        unit: config.unit,
+        transform: config.transform
+      }
+      showConfirmDialog.value = true
+    }
+
+    // 确认写入参数
+    const confirmWriteParameter = async () => {
+      if (!pendingParameter.value || isWriting.value) return
+
+      isWriting.value = true
+      const siteCode = currentSiteCode.value
+      
+      try {
+        const param = pendingParameter.value
+        let writeValue = param.newValue
+
+        // 应用转换函数（如果有）
+        if (param.transform) {
+          writeValue = param.transform(writeValue)
+        }
+
+        console.log('📤 写入参数到PLC:', {
+          siteCode,
+          nodeId: param.nodeId,
+          value: writeValue,
+          type: param.type
+        })
+
+        // 调用写入API
+        await opcuaAPI.writeNode(param.nodeId, writeValue, param.type)
+        
+        console.log('✅ 参数写入成功')
+        alert(`✅ 参数修改成功！\n${param.label}: ${param.oldValue}${param.unit} → ${param.newValue}${param.unit}`)
+        
+        // 关闭对话框
+        showConfirmDialog.value = false
+        pendingParameter.value = null
+
+        // 可选：重新加载参数以确认
+        setTimeout(() => {
+          loadParametersFromPLC()
+        }, 500)
+      } catch (error) {
+        console.error('❌ 参数写入失败:', error)
+        const errorMsg = error.response?.data?.message || error.message || '未知错误'
+        
+        // 如果写入失败，恢复原值
+        const [group, field] = pendingParameter.value.paramKey.split('.')
+        if (group === 'speedParams') speedParams.value[field] = pendingParameter.value.oldValue
+        else if (group === 'heatingParams') heatingParams.value[field] = pendingParameter.value.oldValue
+        else if (group === 'delayParams') delayParams.value[field] = pendingParameter.value.oldValue
+        else if (group === 'coolingParams') coolingParams.value[field] = pendingParameter.value.oldValue
+        else if (group === 'fluidParams') fluidParams.value[field] = pendingParameter.value.oldValue
+        else if (group === 'containerParams') containerParams.value[field] = pendingParameter.value.oldValue
+        
+        alert(`❌ 参数写入失败\n${errorMsg}\n\n原值已恢复`)
+      } finally {
+        isWriting.value = false
+      }
+    }
+
+    // 取消参数修改
+    const cancelParameterChange = () => {
+      if (!pendingParameter.value) return
+
+      // 恢复原值
+      const [group, field] = pendingParameter.value.paramKey.split('.')
+      if (group === 'speedParams') speedParams.value[field] = pendingParameter.value.oldValue
+      else if (group === 'heatingParams') heatingParams.value[field] = pendingParameter.value.oldValue
+      else if (group === 'delayParams') delayParams.value[field] = pendingParameter.value.oldValue
+      else if (group === 'coolingParams') coolingParams.value[field] = pendingParameter.value.oldValue
+      else if (group === 'fluidParams') fluidParams.value[field] = pendingParameter.value.oldValue
+      else if (group === 'containerParams') containerParams.value[field] = pendingParameter.value.oldValue
+
+      showConfirmDialog.value = false
+      pendingParameter.value = null
     }
 
     const toggleHeatingStatus = () => {
@@ -723,7 +1124,14 @@ export default {
       toggleHeatingStatus,
       saveParameters,
       resetParameters: undefined,
-      exportConfig: undefined
+      exportConfig: undefined,
+      // 参数修改确认对话框
+      showConfirmDialog,
+      pendingParameter,
+      isWriting,
+      handleParameterChange,
+      confirmWriteParameter,
+      cancelParameterChange
     }
   }
 }
@@ -1001,6 +1409,122 @@ export default {
   }
 }
 
+/* 参数确认对话框样式 */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.parameter-confirm-dialog {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  min-width: 400px;
+  max-width: 500px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.parameter-confirm-dialog .dialog-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+  border-bottom: 2px solid #667eea;
+  padding-bottom: 12px;
+}
+
+.parameter-confirm-dialog .parameter-info {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.parameter-confirm-dialog .info-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.parameter-confirm-dialog .info-label {
+  font-weight: 500;
+  color: #666;
+  min-width: 80px;
+  font-size: 14px;
+}
+
+.parameter-confirm-dialog .info-value {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.parameter-confirm-dialog .old-value {
+  color: #999;
+  text-decoration: line-through;
+  margin-right: 8px;
+}
+
+.parameter-confirm-dialog .confirm-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 2px solid #e1e5e9;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.parameter-confirm-dialog .confirm-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.parameter-confirm-dialog .info-unit {
+  color: #666;
+  font-size: 14px;
+  margin-left: 4px;
+}
+
+.parameter-confirm-dialog .dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
 @media (max-width: 768px) {
   .form-row {
     grid-template-columns: 1fr;
@@ -1012,6 +1536,12 @@ export default {
   
   .parameter-sections {
     max-height: calc(100vh - 150px);
+  }
+
+  .parameter-confirm-dialog {
+    min-width: 90%;
+    max-width: 90%;
+    padding: 20px;
   }
 }
 </style>
