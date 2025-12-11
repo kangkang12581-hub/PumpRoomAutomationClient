@@ -373,38 +373,6 @@
       </div>
     </div>
 
-    <!-- 24小时重量统计图表 -->
-    <div class="chart-section">
-      <div class="chart-panel card fade-in-up" style="animation-delay: 0.6s">
-        <h3 class="panel-title">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-            <path d="M3 3V21H21" stroke="currentColor" stroke-width="2"/>
-            <path d="M9 9L12 6L16 10L18 7" stroke="currentColor" stroke-width="2"/>
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
-          </svg>
-          24小时重量统计
-        </h3>
-        <div class="panel-content">
-          <div class="chart-container">
-            <div ref="weightChart" class="weight-chart"></div>
-          </div>
-          <div class="chart-summary">
-            <div class="summary-item">
-              <span class="summary-label">今日总重量</span>
-              <span class="summary-value">{{ dailyWeightTotal }} kg</span>
-            </div>
-            <div class="summary-item">
-              <span class="summary-label">最高小时重量</span>
-              <span class="summary-value">{{ maxHourWeight }} kg</span>
-            </div>
-            <div class="summary-item">
-              <span class="summary-label">平均小时重量</span>
-              <span class="summary-value">{{ avgHourWeight }} kg</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -460,13 +428,6 @@ export default {
       isStable: true,         // 是否稳定
       lastUpdate: new Date().toLocaleTimeString() // 最后更新时间
     })
-
-    // 24小时重量数据
-    const hourlyWeightData = ref([])
-    const weightChart = ref(null)
-    const dailyWeightTotal = ref(0)
-    const maxHourWeight = ref(0)
-    const avgHourWeight = ref(0)
 
     // 系统控制数据
     const systemMode = ref('auto') // 'auto' | 'manual'
@@ -998,176 +959,6 @@ export default {
       }
     }
 
-    // 生成24小时重量数据
-    const generateHourlyWeightData = () => {
-      const data = []
-      for (let i = 0; i < 24; i++) {
-        // 模拟不同时段的重量数据，白天时段重量较高
-        let weight = 0
-        if (i >= 6 && i <= 18) {
-          // 白天时段：6-18点，重量较高
-          weight = Math.floor(Math.random() * 800) + 400
-        } else if (i >= 19 && i <= 22) {
-          // 晚上时段：19-22点，重量中等
-          weight = Math.floor(Math.random() * 400) + 200
-        } else {
-          // 深夜时段：23-5点，重量较低
-          weight = Math.floor(Math.random() * 200) + 50
-        }
-        data.push({
-          hour: i,
-          weight: weight
-        })
-      }
-      return data
-    }
-
-    // 加载 ECharts（优先本地依赖，失败则回退 CDN）
-    const loadEcharts = async () => {
-      if (typeof window !== 'undefined' && window.echarts) return window.echarts
-      if (typeof document === 'undefined') return null
-      const cdns = [
-        'https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js',
-        'https://unpkg.com/echarts@5/dist/echarts.min.js',
-        'https://cdn.bootcdn.net/ajax/libs/echarts/5.5.0/echarts.min.js',
-        'https://lib.baomitu.com/echarts/5.5.0/echarts.min.js'
-      ]
-      const tryLoad = (url) => new Promise((resolve, reject) => {
-        let existing = document.querySelector(`script[src="${url}"]`)
-        if (!existing) {
-          existing = document.createElement('script')
-          existing.src = url
-          existing.async = true
-          document.head.appendChild(existing)
-        }
-        existing.onload = () => resolve(true)
-        existing.onerror = () => reject(new Error(`CDN failed: ${url}`))
-      })
-      for (const url of cdns) {
-        try {
-          // eslint-disable-next-line no-await-in-loop
-          await tryLoad(url)
-          if (window.echarts) return window.echarts
-        } catch (_) {
-          // 继续尝试下一个 CDN
-        }
-      }
-      return window.echarts || null
-    }
-
-    // 初始化ECharts图表
-    let chartInitAttempts = 0
-    const initWeightChart = async () => {
-      await nextTick()
-      if (!weightChart.value) return
-
-      const echarts = await loadEcharts()
-      if (!echarts) {
-        console.error('ECharts 未能加载，柱状图无法渲染。')
-        return
-      }
-
-      // 容器尺寸为 0 时，延迟重试
-      const el = weightChart.value
-      const { clientWidth, clientHeight } = el
-      if ((clientWidth === 0 || clientHeight === 0) && chartInitAttempts < 10) {
-        chartInitAttempts += 1
-        setTimeout(initWeightChart, 150)
-        return
-      }
-
-      const chart = echarts.init(el)
-      
-      const option = {
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          },
-          formatter: function(params) {
-            const data = params[0]
-            return `${data.name}时<br/>重量: ${data.value} kg`
-          }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'category',
-          data: hourlyWeightData.value.map(item => `${item.hour}时`),
-          axisLine: {
-            lineStyle: {
-              color: '#666'
-            }
-          },
-          axisLabel: {
-            color: '#666',
-            fontSize: 12
-          }
-        },
-        yAxis: {
-          type: 'value',
-          name: '重量 (kg)',
-          nameTextStyle: {
-            color: '#666',
-            fontSize: 12
-          },
-          axisLine: {
-            lineStyle: {
-              color: '#666'
-            }
-          },
-          axisLabel: {
-            color: '#666',
-            fontSize: 12
-          },
-          splitLine: {
-            lineStyle: {
-              color: '#eee',
-              type: 'dashed'
-            }
-          }
-        },
-        series: [
-          {
-            name: '小时重量',
-            type: 'bar',
-            data: hourlyWeightData.value.map(item => item.weight),
-            itemStyle: {
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#667eea' },
-                { offset: 1, color: '#764ba2' }
-              ]),
-              borderRadius: [4, 4, 0, 0]
-            },
-            emphasis: {
-              itemStyle: {
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                  { offset: 0, color: '#764ba2' },
-                  { offset: 1, color: '#667eea' }
-                ])
-              }
-            }
-          }
-        ]
-      }
-      
-      chart.setOption(option)
-
-      // 保存图表实例
-      weightChart.value.chartInstance = chart
-    }
-
-    // 计算统计数据
-    const calculateStatistics = () => {
-      const weights = hourlyWeightData.value.map(item => item.weight)
-      dailyWeightTotal.value = weights.reduce((sum, weight) => sum + weight, 0)
-      maxHourWeight.value = Math.max(...weights)
-      avgHourWeight.value = Math.round(dailyWeightTotal.value / 24)
-    }
 
     // 系统模式切换
     const switchToAutoMode = async () => {
@@ -1610,27 +1401,7 @@ export default {
       }
     }
 
-    // 初始化数据
-    const handleResize = () => {
-      if (weightChart.value && weightChart.value.chartInstance) {
-        weightChart.value.chartInstance.resize()
-      }
-    }
-
     onMounted(() => {
-      // 生成24小时重量数据
-      hourlyWeightData.value = generateHourlyWeightData()
-      
-      // 计算统计数据
-      calculateStatistics()
-      
-      // 初始化图表
-      initWeightChart()
-
-      // 监听窗口尺寸变化，保持图表自适应
-      if (typeof window !== 'undefined') {
-        window.addEventListener('resize', handleResize)
-      }
 
       // 加载环境数据
       loadEnvironmentData()
@@ -1700,14 +1471,6 @@ export default {
         clearInterval(scaleDataInterval)
         clearInterval(errorCheckInterval)
         clearInterval(parameterThresholdsInterval)
-        
-        if (typeof window !== 'undefined') {
-          window.removeEventListener('resize', handleResize)
-        }
-        if (weightChart.value && weightChart.value.chartInstance) {
-          weightChart.value.chartInstance.dispose()
-          weightChart.value.chartInstance = null
-        }
       })
     })
 
@@ -1819,11 +1582,6 @@ export default {
       waterFlowData,
       gratingMotorData,
       scaleData,
-      hourlyWeightData,
-      weightChart,
-      dailyWeightTotal,
-      maxHourWeight,
-      avgHourWeight,
       getTempStatus,
       getTempStatusText,
       getInsideHumidityStatus,
@@ -1854,8 +1612,6 @@ export default {
       getScaleStatus,
       getScaleStatusText,
       getScaleStatusLabel,
-      initWeightChart,
-      calculateStatistics,
       manualVibrationStop,
       resetAllErrors,
       resetErrorPress,
