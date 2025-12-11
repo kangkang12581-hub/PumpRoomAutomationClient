@@ -64,15 +64,27 @@
 
     <!-- 查询结果 -->
     <div v-if="queryResults.length" class="results-panel card fade-in-up">
-      <h3 class="panel-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-          <path d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3Z" stroke="currentColor" stroke-width="2"/>
-          <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2"/>
-          <line x1="8" y1="16" x2="16" y2="16" stroke="currentColor" stroke-width="2"/>
-          <line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="2"/>
-        </svg>
-        查询结果
-      </h3>
+      <div class="panel-header">
+        <h3 class="panel-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <path d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3Z" stroke="currentColor" stroke-width="2"/>
+            <line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2"/>
+            <line x1="8" y1="16" x2="16" y2="16" stroke="currentColor" stroke-width="2"/>
+            <line x1="8" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          查询结果
+        </h3>
+        <button @click="exportToExcel" class="btn export-btn" :disabled="!queryResults.length || loading">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="currentColor" stroke-width="2"/>
+            <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2"/>
+            <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2"/>
+            <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2"/>
+            <line x1="10" y1="9" x2="8" y2="9" stroke="currentColor" stroke-width="2"/>
+          </svg>
+          导出Excel
+        </button>
+      </div>
       <div class="results-content">
         <div class="table-container">
           <table class="data-table">
@@ -138,6 +150,7 @@
 
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import * as XLSX from 'xlsx'
 import { dataQueryAPI, siteAPI } from '@/services/api'
 import { getCurrentSite, getCurrentSiteCode, onSiteChange } from '@/utils/siteManager'
 
@@ -400,7 +413,64 @@ export default {
       })
     })
 
-    // 已移除 导出数据 逻辑
+    // 导出数据到Excel
+    const exportToExcel = () => {
+      if (!queryResults.value || queryResults.value.length === 0) {
+        alert('没有数据可导出')
+        return
+      }
+
+      try {
+        // 准备导出数据
+        const exportData = queryResults.value.map(record => ({
+          '时间': formatDateTime(record.timestamp),
+          '数据类型': getDataTypeName(record.type),
+          '数值': record.value,
+          '单位': record.unit,
+          '状态': getStatusName(record.status)
+        }))
+
+        // 创建工作簿
+        const wb = XLSX.utils.book_new()
+        
+        // 创建工作表
+        const ws = XLSX.utils.json_to_sheet(exportData)
+        
+        // 设置列宽
+        const colWidths = [
+          { wch: 20 }, // 时间
+          { wch: 15 }, // 数据类型
+          { wch: 12 }, // 数值
+          { wch: 8 },  // 单位
+          { wch: 10 }  // 状态
+        ]
+        ws['!cols'] = colWidths
+        
+        // 将工作表添加到工作簿
+        XLSX.utils.book_append_sheet(wb, ws, '查询数据')
+        
+        // 生成文件名（包含时间戳）
+        const now = new Date()
+        const timestamp = now.toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }).replace(/[\/\s:]/g, '')
+        
+        const fileName = `数据查询结果_${timestamp}.xlsx`
+        
+        // 导出文件
+        XLSX.writeFile(wb, fileName)
+        
+        console.log(`成功导出 ${exportData.length} 条数据到 ${fileName}`)
+      } catch (error) {
+        console.error('导出Excel失败:', error)
+        alert(`导出失败: ${error.message || '未知错误'}`)
+      }
+    }
 
     return {
       loading,
@@ -415,7 +485,7 @@ export default {
       getStatusName,
       formatDateTime,
       executeQuery,
-      
+      exportToExcel
     }
   }
 }
@@ -457,6 +527,15 @@ export default {
   padding: 24px;
 }
 
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
+}
+
 .panel-title {
   display: flex;
   align-items: center;
@@ -464,9 +543,34 @@ export default {
   font-size: 18px;
   font-weight: 600;
   color: #333;
-  margin-bottom: 20px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
+  margin: 0;
+}
+
+.export-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: linear-gradient(45deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.export-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  background: linear-gradient(45deg, #059669, #047857);
+}
+
+.export-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .query-form {
