@@ -446,7 +446,7 @@ export default {
     const loadUserSites = async () => {
       try {
         const response = await siteAssignmentAPI.getMySites()
-        console.log('用户站点数据:', response)
+        console.log('📥 用户站点数据:', response)
         
         const userSites = response.data?.sites || response.sites || []
         if (userSites.length > 0) {
@@ -460,79 +460,128 @@ export default {
               location: site.siteLocation || site.site_location,
               isOnline: site.isOnline || site.is_online
             }))
-          console.log('已加载用户站点:', sites.value)
+          console.log('✅ 已加载用户站点:', sites.value)
         } else {
-          console.warn('用户没有分配任何站点')
-          sites.value = []
+          console.warn('⚠️ 用户没有分配任何站点，使用默认站点')
+          // 保留默认站点
         }
       } catch (error) {
-        console.error('加载用户站点失败:', error)
-        // 保留假数据作为后备
+        console.warn('⚠️ 加载用户站点失败，使用默认站点:', error.message)
+        // 保留默认站点作为后备，不要抛出错误
       }
     }
 
     onMounted(async () => {
-      username.value = localStorage.getItem('username') || '用户'
-      const userInfoRaw = localStorage.getItem('userInfo')
-      const userInfo = userInfoRaw ? JSON.parse(userInfoRaw) : null
-      role.value = (userInfo && userInfo.role) || localStorage.getItem('role') || 'observer'
-
-      // 从API加载用户站点
-      await loadUserSites()
-
-      // 恢复上次选择的站点
-      const savedSite = getCurrentSiteCode()
-      if (savedSite && sites.value.find(s => s.siteCode === savedSite)) {
-        currentSiteId.value = savedSite
-      } else if (sites.value.length > 0) {
-        // 自动选择第一个站点
-        currentSiteId.value = sites.value[0].siteCode
-      }
+      console.log('📱 Dashboard 组件挂载开始')
+      console.log('🔍 认证状态:', authAPI.isAuthenticated())
+      console.log('🔍 localStorage token:', localStorage.getItem('authToken')?.substring(0, 30) + '...')
       
-      // 初始化当前站点
-      if (currentSiteId.value) {
-        const current = sites.value.find(s => s.siteCode === currentSiteId.value) || null
-        setCurrentSite(currentSiteId.value, current)
-        console.log('初始站点:', currentSiteId.value, current)
-      }
-      // 优先以后台为准：拉取 /auth/me，覆盖本地缓存
       try {
-        const me = await authAPI.getCurrentUser()
-        if (me) {
-          username.value = me.username || username.value
-          // 兼容后端返回字段：优先 user_group 或 UserGroup（两种命名格式）；若无则根据 is_admin / is_active 等推断
-          const backendRole = (me.user_group || me.UserGroup || me.userGroup || '').toString().toLowerCase()
-          if (['root','admin','operator','observer'].includes(backendRole)) {
-            role.value = backendRole
-          } else if (me.is_admin === true || me.IsAdmin === true || me.isAdmin === true) {
+        username.value = localStorage.getItem('username') || '用户'
+        const userInfoRaw = localStorage.getItem('userInfo')
+        const userInfo = userInfoRaw ? JSON.parse(userInfoRaw) : null
+        console.log('👤 用户信息:', userInfo)
+        
+        // 从 userInfo 中获取角色，兼容不同的字段名
+        if (userInfo) {
+          if (userInfo.role) {
+            role.value = userInfo.role
+          } else if (userInfo.isAdmin) {
             role.value = 'admin'
-          }
-          // 优先通过站点分配接口获取“我的站点”
-          try {
-            const mySites = await siteAssignmentAPI.getMySites()
-            if (mySites && Array.isArray(mySites.sites)) {
-              sites.value = mySites.sites.map(s => ({ id: s.id ?? s.code ?? s.site_code ?? s.name, name: s.site_name ?? s.name ?? String(s.id) }))
+          } else if (userInfo.userGroup) {
+            // 根据 userGroup 映射角色
+            const groupRoleMap = {
+              'ADMIN': 'admin',
+              'OPERATOR': 'operator',
+              'OBSERVER': 'observer'
             }
-          } catch {}
-          // 仍兼容后端直接返回的 sites 字段
-          if ((!sites.value || sites.value.length === 0) && Array.isArray(me.sites) && me.sites.length > 0) {
-            sites.value = me.sites.map(s => ({ id: s.id ?? s.code ?? s.name, name: s.name ?? String(s.id ?? s.code) }))
+            role.value = groupRoleMap[userInfo.userGroup] || 'observer'
+          } else {
+            role.value = 'observer'
           }
-          // 覆盖本地缓存，供后续使用
-          const merged = { ...(userInfo || {}), username: username.value, role: role.value, sites: sites.value }
-          localStorage.setItem('userInfo', JSON.stringify(merged))
-          localStorage.setItem('username', username.value)
-          localStorage.setItem('role', role.value)
         }
-      } catch {}
+        console.log('🎭 用户角色:', role.value)
 
-      updateCurrentTime()
-      timeInterval = setInterval(updateCurrentTime, 1000)
+        // 从API加载用户站点（容错处理）
+        try {
+          await loadUserSites()
+          console.log('✅ 用户站点加载成功:', sites.value)
+        } catch (error) {
+          console.warn('⚠️ 加载用户站点失败，使用默认站点:', error)
+          // 保留默认站点
+        }
 
-      // 初始化工作模式状态
-      updateModeStatus()
-      // 每5秒更新一次工作模式状态
-      modeCheckInterval = setInterval(updateModeStatus, 5000)
+        // 恢复上次选择的站点
+        const savedSite = getCurrentSiteCode()
+        if (savedSite && sites.value.find(s => s.siteCode === savedSite)) {
+          currentSiteId.value = savedSite
+        } else if (sites.value.length > 0) {
+          // 自动选择第一个站点
+          currentSiteId.value = sites.value[0].siteCode
+        }
+        
+        // 初始化当前站点
+        if (currentSiteId.value) {
+          const current = sites.value.find(s => s.siteCode === currentSiteId.value) || null
+          setCurrentSite(currentSiteId.value, current)
+          console.log('🏭 初始站点:', currentSiteId.value, current)
+        }
+        
+        // 优先以后台为准：拉取 /auth/me，覆盖本地缓存（容错处理）
+        try {
+          console.log('📡 尝试获取当前用户信息...')
+          const response = await authAPI.getCurrentUser()
+          const me = response?.data || response
+          console.log('📥 获取用户信息响应:', me)
+          
+          if (me && me !== null) {
+            username.value = me.username || username.value
+            // 兼容后端返回字段：优先 user_group 或 UserGroup（两种命名格式）；若无则根据 is_admin / is_active 等推断
+            const backendRole = (me.user_group || me.UserGroup || me.userGroup || '').toString().toLowerCase()
+            if (['root','admin','operator','observer'].includes(backendRole)) {
+              role.value = backendRole
+            } else if (me.is_admin === true || me.IsAdmin === true || me.isAdmin === true) {
+              role.value = 'admin'
+            }
+            // 优先通过站点分配接口获取"我的站点"
+            try {
+              const mySites = await siteAssignmentAPI.getMySites()
+              if (mySites && Array.isArray(mySites.sites)) {
+                sites.value = mySites.sites.map(s => ({ id: s.id ?? s.code ?? s.site_code ?? s.name, name: s.site_name ?? s.name ?? String(s.id) }))
+              }
+            } catch (siteError) {
+              console.warn('⚠️ 获取站点分配失败:', siteError)
+            }
+            // 仍兼容后端直接返回的 sites 字段
+            if ((!sites.value || sites.value.length === 0) && Array.isArray(me.sites) && me.sites.length > 0) {
+              sites.value = me.sites.map(s => ({ id: s.id ?? s.code ?? s.name, name: s.name ?? String(s.id ?? s.code) }))
+            }
+            // 覆盖本地缓存，供后续使用
+            const merged = { ...(userInfo || {}), username: username.value, role: role.value, sites: sites.value }
+            localStorage.setItem('userInfo', JSON.stringify(merged))
+            localStorage.setItem('username', username.value)
+            localStorage.setItem('role', role.value)
+          } else {
+            console.warn('⚠️ 后端返回的用户信息为空，使用本地缓存')
+          }
+        } catch (meError) {
+          console.warn('⚠️ 获取当前用户信息失败，使用本地缓存:', meError)
+          // 继续使用本地缓存的用户信息
+        }
+
+        updateCurrentTime()
+        timeInterval = setInterval(updateCurrentTime, 1000)
+
+        // 初始化工作模式状态
+        updateModeStatus()
+        // 每5秒更新一次工作模式状态
+        modeCheckInterval = setInterval(updateModeStatus, 5000)
+        
+        console.log('✅ Dashboard 组件挂载完成')
+      } catch (error) {
+        console.error('❌ Dashboard 初始化错误:', error)
+        // 不要抛出错误，避免页面崩溃
+      }
     })
 
     onUnmounted(() => {
