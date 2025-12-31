@@ -1093,16 +1093,9 @@ export const opcuaAPI = {
    */
   async saveParametersToDatabase(parameters) {
     try {
-      const response = await fetch('http://192.168.10.96:5000/api/operational-parameters/save-from-plc', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify(parameters)
-      });
-      if (!response.ok) throw new Error(`保存到数据库失败: ${response.status} ${response.statusText}`);
-      return await response.json();
+      // 使用统一的 apiService，自动通过 Vite 代理转发到后端
+      const response = await apiService.post('/operational-parameters/save-from-plc', parameters);
+      return response.data || response;
     } catch (error) {
       console.error('保存参数到数据库错误:', error);
       throw error;
@@ -1114,14 +1107,9 @@ export const opcuaAPI = {
    */
   async getMyParameters() {
     try {
-      const response = await fetch('http://192.168.10.96:5000/api/operational-parameters/my', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-      });
-      if (!response.ok) throw new Error(`获取参数失败: ${response.status} ${response.statusText}`);
-      return await response.json();
+      // 使用统一的 apiService，自动通过 Vite 代理转发到后端
+      const response = await apiService.get('/operational-parameters/my');
+      return response.data || response;
     } catch (error) {
       console.error('获取参数错误:', error);
       throw error;
