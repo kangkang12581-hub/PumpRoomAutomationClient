@@ -502,14 +502,14 @@ export default {
         }
         console.log('🎭 用户角色:', role.value)
 
-        // 从API加载用户站点（容错处理）
-        try {
-          await loadUserSites()
-          console.log('✅ 用户站点加载成功:', sites.value)
-        } catch (error) {
-          console.warn('⚠️ 加载用户站点失败，使用默认站点:', error)
-          // 保留默认站点
-        }
+        // 暂时注释掉站点加载，避免401/403导致闪退
+        // 等待后端实现站点分配接口后再启用
+        console.log('ℹ️ 使用默认站点（后端站点分配接口暂未实现）')
+        // 使用默认站点
+        sites.value = [
+          { siteCode: 'site-a', name: '站点A', id: 1 },
+          { siteCode: 'site-b', name: '站点B', id: 2 }
+        ]
 
         // 恢复上次选择的站点
         const savedSite = getCurrentSiteCode()
@@ -527,47 +527,9 @@ export default {
           console.log('🏭 初始站点:', currentSiteId.value, current)
         }
         
-        // 优先以后台为准：拉取 /auth/me，覆盖本地缓存（容错处理）
-        try {
-          console.log('📡 尝试获取当前用户信息...')
-          const response = await authAPI.getCurrentUser()
-          const me = response?.data || response
-          console.log('📥 获取用户信息响应:', me)
-          
-          if (me && me !== null) {
-            username.value = me.username || username.value
-            // 兼容后端返回字段：优先 user_group 或 UserGroup（两种命名格式）；若无则根据 is_admin / is_active 等推断
-            const backendRole = (me.user_group || me.UserGroup || me.userGroup || '').toString().toLowerCase()
-            if (['root','admin','operator','observer'].includes(backendRole)) {
-              role.value = backendRole
-            } else if (me.is_admin === true || me.IsAdmin === true || me.isAdmin === true) {
-              role.value = 'admin'
-            }
-            // 优先通过站点分配接口获取"我的站点"
-            try {
-              const mySites = await siteAssignmentAPI.getMySites()
-              if (mySites && Array.isArray(mySites.sites)) {
-                sites.value = mySites.sites.map(s => ({ id: s.id ?? s.code ?? s.site_code ?? s.name, name: s.site_name ?? s.name ?? String(s.id) }))
-              }
-            } catch (siteError) {
-              console.warn('⚠️ 获取站点分配失败:', siteError)
-            }
-            // 仍兼容后端直接返回的 sites 字段
-            if ((!sites.value || sites.value.length === 0) && Array.isArray(me.sites) && me.sites.length > 0) {
-              sites.value = me.sites.map(s => ({ id: s.id ?? s.code ?? s.name, name: s.name ?? String(s.id ?? s.code) }))
-            }
-            // 覆盖本地缓存，供后续使用
-            const merged = { ...(userInfo || {}), username: username.value, role: role.value, sites: sites.value }
-            localStorage.setItem('userInfo', JSON.stringify(merged))
-            localStorage.setItem('username', username.value)
-            localStorage.setItem('role', role.value)
-          } else {
-            console.warn('⚠️ 后端返回的用户信息为空，使用本地缓存')
-          }
-        } catch (meError) {
-          console.warn('⚠️ 获取当前用户信息失败，使用本地缓存:', meError)
-          // 继续使用本地缓存的用户信息
-        }
+        // 暂时注释掉后端用户信息获取，避免401/403导致闪退
+        // 等待后端实现 /api/auth/me 接口后再启用
+        console.log('ℹ️ 使用本地缓存的用户信息（后端 /api/auth/me 接口暂未实现）')
 
         updateCurrentTime()
         timeInterval = setInterval(updateCurrentTime, 1000)
