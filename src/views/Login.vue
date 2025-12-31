@@ -160,44 +160,81 @@ export default {
       errorMessage.value = ''
 
       try {
-        console.log('🚀 开始登录流程...')
+        console.log('🚀 ========== 开始登录流程 ==========')
+        console.log('📝 登录表单数据:', { username: loginForm.value.username, password: '***' })
+        console.log('🔍 当前路由:', router.currentRoute.value.path)
+        console.log('🔍 当前 localStorage:', {
+          authToken: localStorage.getItem('authToken') ? '存在' : '不存在',
+          username: localStorage.getItem('username'),
+          userInfo: localStorage.getItem('userInfo') ? '存在' : '不存在'
+        })
         
         // 调用真实的认证API
+        console.log('📡 调用 authAPI.login()...')
         const response = await authAPI.login(
           loginForm.value.username, 
           loginForm.value.password
         )
 
         console.log('✅ 登录API调用成功')
+        console.log('📦 登录响应数据:', {
+          username: response.username,
+          displayName: response.displayName,
+          hasAccessToken: !!response.accessToken,
+          accessTokenLength: response.accessToken?.length
+        })
 
         // 保存记住我选项
         if (loginForm.value.rememberMe) {
           localStorage.setItem('rememberMe', 'true')
           localStorage.setItem('rememberedUsername', loginForm.value.username)
+          console.log('💾 已保存"记住我"选项')
         } else {
           localStorage.removeItem('rememberMe')
           localStorage.removeItem('rememberedUsername')
+          console.log('🗑️ 已清除"记住我"选项')
         }
 
         // 登录成功提示
         console.log('✅ 登录成功:', response.username, response.displayName)
         
         // 验证认证状态
-        console.log('🔍 验证认证状态:', authAPI.isAuthenticated())
+        const isAuth1 = authAPI.isAuthenticated()
+        console.log('🔍 第一次验证认证状态:', isAuth1)
+        console.log('🔍 localStorage 中的 token (第一次):', localStorage.getItem('authToken')?.substring(0, 30) + '...')
         
         // 等待一小段时间确保状态已保存
+        console.log('⏳ 等待100ms确保状态已保存...')
         await new Promise(resolve => setTimeout(resolve, 100))
         
-        console.log('🔍 再次验证认证状态:', authAPI.isAuthenticated())
-        console.log('🔍 localStorage 中的 token:', localStorage.getItem('authToken')?.substring(0, 30) + '...')
+        const isAuth2 = authAPI.isAuthenticated()
+        console.log('🔍 第二次验证认证状态:', isAuth2)
+        console.log('🔍 localStorage 中的 token (第二次):', localStorage.getItem('authToken')?.substring(0, 30) + '...')
+        console.log('🔍 localStorage 完整内容:', {
+          authToken: localStorage.getItem('authToken') ? '存在 (' + localStorage.getItem('authToken').length + ' 字符)' : '不存在',
+          username: localStorage.getItem('username'),
+          userInfo: localStorage.getItem('userInfo') ? '存在' : '不存在',
+          tokenExpirationTime: localStorage.getItem('tokenExpirationTime')
+        })
 
         // 跳转到仪表板
         console.log('📍 准备跳转到 /dashboard')
-        await router.push('/dashboard')
-        console.log('✅ 路由跳转完成')
+        console.log('📍 当前路由路径:', router.currentRoute.value.path)
+        console.log('📍 目标路由路径: /dashboard')
+        
+        const pushResult = await router.push('/dashboard')
+        console.log('✅ router.push() 调用完成，返回结果:', pushResult)
+        console.log('✅ 路由跳转完成，当前路由:', router.currentRoute.value.path)
+        console.log('✅ ========== 登录流程完成 ==========')
         
       } catch (error) {
-        console.error('登录错误:', error)
+        console.error('❌ ========== 登录错误 ==========')
+        console.error('❌ 错误对象:', error)
+        console.error('❌ 错误消息:', error.message)
+        console.error('❌ 错误堆栈:', error.stack)
+        console.error('❌ 错误类型:', error.constructor.name)
+        console.error('❌ 当前路由:', router.currentRoute.value.path)
+        console.error('❌ ========== 登录错误结束 ==========')
         
         // 根据错误类型显示不同的错误信息
         if (error.message.includes('401') || error.message.includes('用户名或密码')) {
@@ -211,6 +248,7 @@ export default {
         }
       } finally {
         loading.value = false
+        console.log('🏁 handleLogin 函数执行完成，loading 设置为 false')
       }
     }
 

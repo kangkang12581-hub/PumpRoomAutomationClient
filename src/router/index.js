@@ -64,18 +64,29 @@ const router = createRouter({
 
 // 路由守卫
 router.beforeEach((to, from, next) => {
-  console.log(`🚦 路由守卫: ${from.path} -> ${to.path}`)
+  console.log('🚦 ========== 路由守卫开始 ==========')
+  console.log(`🚦 路由跳转: ${from.path} -> ${to.path}`)
+  console.log(`🚦 来源路由名称: ${from.name || '无'}`)
+  console.log(`🚦 目标路由名称: ${to.name || '无'}`)
+  console.log(`🚦 目标路由 meta:`, to.meta)
+  console.log(`🚦 目标路由 requiresAuth:`, to.meta.requiresAuth)
   
   // 设置页面标题
   if (to.meta.title) {
     document.title = to.meta.title
+    console.log(`📄 设置页面标题: ${to.meta.title}`)
   }
   
   // 暂时禁用JWT验证，允许所有路由访问
   // 检查认证状态
-  // const isAuth = apiService.isAuthenticated()
-  // const hasToken = !!localStorage.getItem('authToken')
-  // console.log(`🔐 认证状态: isAuthenticated=${isAuth}, hasToken=${hasToken}`)
+  const isAuth = apiService.isAuthenticated()
+  const hasToken = !!localStorage.getItem('authToken')
+  console.log(`🔐 认证状态检查 (仅用于日志): isAuthenticated=${isAuth}, hasToken=${hasToken}`)
+  console.log(`🔐 localStorage 内容:`, {
+    authToken: localStorage.getItem('authToken') ? '存在' : '不存在',
+    username: localStorage.getItem('username'),
+    userInfo: localStorage.getItem('userInfo') ? '存在' : '不存在'
+  })
   
   // 暂时禁用认证检查，允许所有路由访问
   // if (to.meta.requiresAuth) {
@@ -97,7 +108,8 @@ router.beforeEach((to, from, next) => {
   //   return
   // }
   
-  console.log('✅ 路由守卫通过')
+  console.log('✅ 路由守卫通过，调用 next()')
+  console.log('🚦 ========== 路由守卫结束 ==========')
   next()
 })
 

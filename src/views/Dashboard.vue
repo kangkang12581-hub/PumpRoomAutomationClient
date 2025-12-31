@@ -422,23 +422,31 @@ export default {
 
     // 更新设备工作模式状态
     const updateModeStatus = async () => {
+      console.log('🔄 [Dashboard] 开始更新工作模式状态...')
       try {
         const modeData = await opcuaAPI.getModeStatus()
+        console.log('✅ [Dashboard] 获取工作模式成功:', modeData)
         deviceMode.value = {
           isRemote: modeData.isRemote || false,
           mode: modeData.mode || 'local',
           available: modeData.available || false,
           timestamp: modeData.timestamp
         }
-        console.log('工作模式更新:', deviceMode.value)
+        console.log('✅ [Dashboard] 工作模式更新完成:', deviceMode.value)
       } catch (error) {
-        console.error('获取工作模式失败:', error)
+        console.error('❌ [Dashboard] 获取工作模式失败:', error)
+        console.error('❌ [Dashboard] 错误详情:', {
+          message: error.message,
+          stack: error.stack,
+          currentRoute: router.currentRoute.value.path
+        })
         deviceMode.value = {
           isRemote: false,
           mode: 'local',
           available: false,
           timestamp: null
         }
+        console.log('✅ [Dashboard] 使用默认工作模式值')
       }
     }
 
@@ -472,9 +480,17 @@ export default {
     }
 
     onMounted(async () => {
-      console.log('📱 Dashboard 组件挂载开始')
+      console.log('📱 ========== Dashboard 组件挂载开始 ==========')
+      console.log('📱 当前路由:', router.currentRoute.value.path)
+      console.log('📱 当前路由名称:', router.currentRoute.value.name)
       console.log('🔍 认证状态:', authAPI.isAuthenticated())
       console.log('🔍 localStorage token:', localStorage.getItem('authToken')?.substring(0, 30) + '...')
+      console.log('🔍 localStorage 完整内容:', {
+        authToken: localStorage.getItem('authToken') ? '存在 (' + localStorage.getItem('authToken').length + ' 字符)' : '不存在',
+        username: localStorage.getItem('username'),
+        userInfo: localStorage.getItem('userInfo') ? '存在' : '不存在',
+        tokenExpirationTime: localStorage.getItem('tokenExpirationTime')
+      })
       
       try {
         username.value = localStorage.getItem('username') || '用户'
@@ -540,8 +556,14 @@ export default {
         modeCheckInterval = setInterval(updateModeStatus, 5000)
         
         console.log('✅ Dashboard 组件挂载完成')
+        console.log('📱 ========== Dashboard 组件挂载结束 ==========')
       } catch (error) {
-        console.error('❌ Dashboard 初始化错误:', error)
+        console.error('❌ ========== Dashboard 初始化错误 ==========')
+        console.error('❌ 错误对象:', error)
+        console.error('❌ 错误消息:', error.message)
+        console.error('❌ 错误堆栈:', error.stack)
+        console.error('❌ 当前路由:', router.currentRoute.value.path)
+        console.error('❌ ========== Dashboard 初始化错误结束 ==========')
         // 不要抛出错误，避免页面崩溃
       }
     })

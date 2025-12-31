@@ -57,47 +57,68 @@ class ApiService {
     }
 
     try {
+      console.log(`📡 [API] 发送请求: ${this.baseURL}${finalUrl}`, {
+        method: config.method || 'GET',
+        headers: config.headers,
+        hasBody: !!config.body
+      })
+      
       const response = await fetch(`${this.baseURL}${finalUrl}`, config)
+      
+      console.log(`📥 [API] 收到响应:`, {
+        url: `${this.baseURL}${finalUrl}`,
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        headers: Object.fromEntries(response.headers.entries())
+      })
       
       // 检查响应状态
       if (!response.ok) {
+        console.warn(`⚠️ [API] 响应状态异常: ${response.status} ${response.statusText}`)
+        
         if (response.status === 401) {
+          console.error('❌ ========== 401 未授权错误 ==========')
+          console.error('❌ 请求URL:', `${this.baseURL}${finalUrl}`)
+          console.error('❌ 重试次数:', retryCount)
+          console.error('❌ 是否已认证:', this.isAuthenticated())
+          console.error('❌ 当前路由:', window.location.pathname)
+          
+          // 暂时禁用自动跳转，仅记录日志
           // 如果是401且是第一次尝试，尝试刷新token后重试
           if (retryCount === 0 && this.isAuthenticated()) {
             try {
+              console.log('🔄 尝试刷新token...')
               await this.refreshToken()
               // 重试请求（最多重试1次）
+              console.log('🔄 刷新成功，重试请求...')
               return this.request(url, options, retryCount + 1)
             } catch (refreshError) {
-              console.error('刷新token失败，跳转到登录页:', refreshError)
-              // 刷新失败，清除本地token并跳转到登录页
-              this.clearAuth()
-              window.location.href = '/login'
+              console.error('❌ 刷新token失败:', refreshError)
+              // 暂时不自动跳转，仅抛出错误
+              // this.clearAuth()
+              // window.location.href = '/login'
               throw new Error('登录已过期，请重新登录')
             }
           } else {
-            // 重试后仍然401，清除本地token并跳转到登录页
-            this.clearAuth()
-            window.location.href = '/login'
+            // 暂时不自动跳转，仅抛出错误
+            console.error('❌ 401错误，但不自动跳转（JWT验证已禁用）')
+            // this.clearAuth()
+            // window.location.href = '/login'
             throw new Error('登录已过期，请重新登录')
           }
         }
         
         if (response.status === 403) {
-          // 403 Forbidden - 已认证但无权限访问
-          console.error('❌ 403 Forbidden - 权限不足或Token无效')
-          // 检查是否有token
-          if (!this.isAuthenticated()) {
-            console.error('未登录，跳转到登录页')
-            this.clearAuth()
-            window.location.href = '/login'
-            throw new Error('请先登录')
-          }
-          // 有token但被拒绝，可能是token无效或权限不足
-          // 尝试清除并重新登录
-          console.warn('Token可能已失效，请重新登录')
-          this.clearAuth()
-          window.location.href = '/login'
+          console.error('❌ ========== 403 禁止访问错误 ==========')
+          console.error('❌ 请求URL:', `${this.baseURL}${finalUrl}`)
+          console.error('❌ 是否已认证:', this.isAuthenticated())
+          console.error('❌ 当前路由:', window.location.pathname)
+          
+          // 暂时不自动跳转，仅抛出错误
+          console.error('❌ 403错误，但不自动跳转（JWT验证已禁用）')
+          // this.clearAuth()
+          // window.location.href = '/login'
           throw new Error('您没有权限访问该资源或登录已失效，请重新登录')
         }
         
@@ -126,10 +147,17 @@ class ApiService {
 
       // 解析JSON响应
       const data = await response.json()
+      console.log(`✅ [API] 请求成功，响应数据:`, data)
       return data
       
     } catch (error) {
-      console.error('API请求错误:', error)
+      console.error('❌ ========== API请求错误 ==========')
+      console.error('❌ 错误URL:', `${this.baseURL}${finalUrl}`)
+      console.error('❌ 错误对象:', error)
+      console.error('❌ 错误消息:', error.message)
+      console.error('❌ 错误堆栈:', error.stack)
+      console.error('❌ 当前路由:', window.location.pathname)
+      console.error('❌ ========== API请求错误结束 ==========')
       throw error
     }
   }
