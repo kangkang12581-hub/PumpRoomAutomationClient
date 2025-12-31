@@ -83,6 +83,24 @@ class ApiService {
           }
         }
         
+        if (response.status === 403) {
+          // 403 Forbidden - 已认证但无权限访问
+          console.error('❌ 403 Forbidden - 权限不足或Token无效')
+          // 检查是否有token
+          if (!this.isAuthenticated()) {
+            console.error('未登录，跳转到登录页')
+            this.clearAuth()
+            window.location.href = '/login'
+            throw new Error('请先登录')
+          }
+          // 有token但被拒绝，可能是token无效或权限不足
+          // 尝试清除并重新登录
+          console.warn('Token可能已失效，请重新登录')
+          this.clearAuth()
+          window.location.href = '/login'
+          throw new Error('您没有权限访问该资源或登录已失效，请重新登录')
+        }
+        
         // 尝试解析错误响应
         let errorData
         try {
