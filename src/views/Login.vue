@@ -176,7 +176,7 @@ export default {
         }
 
         // 登录成功提示
-        console.log('登录成功:', response.user)
+        console.log('登录成功:', response.username, response.displayName)
 
         // 跳转到仪表板
         router.push('/dashboard')

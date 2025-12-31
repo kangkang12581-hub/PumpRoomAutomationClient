@@ -287,11 +287,22 @@ export const authAPI = {
       password
     })
     
-    // 后端返回格式: { success: true, message: "...", data: { accessToken, user, ... } }
+    // 后端返回格式: { code: 200, message: "...", data: { accessToken, username, email, ... } }
     const loginData = response.data || response
     
+    // 构建用户信息对象（后端将用户信息展平在同一级别）
+    const userInfo = {
+      userId: loginData.userId,
+      username: loginData.username,
+      displayName: loginData.displayName,
+      email: loginData.email,
+      userGroup: loginData.userGroup,
+      userLevel: loginData.userLevel,
+      isAdmin: loginData.isAdmin
+    }
+    
     // 保存认证信息（包括过期时间）
-    apiService.saveAuth(loginData.accessToken, loginData.user, loginData.expiresIn)
+    apiService.saveAuth(loginData.accessToken, userInfo, loginData.expiresIn)
     
     return loginData
   },
