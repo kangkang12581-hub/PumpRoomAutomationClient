@@ -160,11 +160,15 @@ export default {
       errorMessage.value = ''
 
       try {
+        console.log('🚀 开始登录流程...')
+        
         // 调用真实的认证API
         const response = await authAPI.login(
           loginForm.value.username, 
           loginForm.value.password
         )
+
+        console.log('✅ 登录API调用成功')
 
         // 保存记住我选项
         if (loginForm.value.rememberMe) {
@@ -176,10 +180,21 @@ export default {
         }
 
         // 登录成功提示
-        console.log('登录成功:', response.username, response.displayName)
+        console.log('✅ 登录成功:', response.username, response.displayName)
+        
+        // 验证认证状态
+        console.log('🔍 验证认证状态:', authAPI.isAuthenticated())
+        
+        // 等待一小段时间确保状态已保存
+        await new Promise(resolve => setTimeout(resolve, 100))
+        
+        console.log('🔍 再次验证认证状态:', authAPI.isAuthenticated())
+        console.log('🔍 localStorage 中的 token:', localStorage.getItem('authToken')?.substring(0, 30) + '...')
 
         // 跳转到仪表板
-        router.push('/dashboard')
+        console.log('📍 准备跳转到 /dashboard')
+        await router.push('/dashboard')
+        console.log('✅ 路由跳转完成')
         
       } catch (error) {
         console.error('登录错误:', error)

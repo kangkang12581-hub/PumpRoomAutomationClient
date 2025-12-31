@@ -196,6 +196,7 @@ class ApiService {
    * 保存认证信息
    */
   saveAuth(token, userInfo, expiresIn = null) {
+    console.log('🔐 保存认证信息:', { token: token?.substring(0, 20) + '...', userInfo, expiresIn })
     localStorage.setItem('authToken', token)
     localStorage.setItem('username', userInfo.username)
     localStorage.setItem('userInfo', JSON.stringify(userInfo))
@@ -205,6 +206,7 @@ class ApiService {
       const expirationTime = Date.now() + (expiresIn - 300) * 1000 // 提前5分钟刷新
       localStorage.setItem('tokenExpirationTime', expirationTime.toString())
     }
+    console.log('✅ 认证信息已保存到 localStorage')
   }
   
   /**
@@ -256,13 +258,6 @@ class ApiService {
   }
 
   /**
-   * 检查是否已登录
-   */
-  isAuthenticated() {
-    return !!localStorage.getItem('authToken')
-  }
-
-  /**
    * 获取当前用户信息
    */
   getCurrentUser() {
@@ -282,13 +277,18 @@ export const authAPI = {
    * 用户登录
    */
   async login(username, password) {
+    console.log('📡 发送登录请求:', { username })
     const response = await apiService.post('/auth/login', {
       username,
       password
     })
     
+    console.log('📥 登录响应:', response)
+    
     // 后端返回格式: { code: 200, message: "...", data: { accessToken, username, email, ... } }
     const loginData = response.data || response
+    
+    console.log('📦 解析的登录数据:', loginData)
     
     // 构建用户信息对象（后端将用户信息展平在同一级别）
     const userInfo = {
@@ -301,8 +301,14 @@ export const authAPI = {
       isAdmin: loginData.isAdmin
     }
     
+    console.log('👤 用户信息:', userInfo)
+    
     // 保存认证信息（包括过期时间）
     apiService.saveAuth(loginData.accessToken, userInfo, loginData.expiresIn)
+    
+    // 验证保存是否成功
+    console.log('🔍 验证认证状态:', apiService.isAuthenticated())
+    console.log('🔍 localStorage authToken:', localStorage.getItem('authToken')?.substring(0, 20) + '...')
     
     return loginData
   },
