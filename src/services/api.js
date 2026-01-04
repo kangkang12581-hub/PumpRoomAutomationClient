@@ -18,37 +18,24 @@ class ApiService {
   }
 
   /**
-   * 获取认证头
+   * 获取请求头（无需JWT认证）
    */
   getAuthHeaders() {
-    const token = localStorage.getItem('authToken')
-    return token ? {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    } : {
+    return {
       'Content-Type': 'application/json'
     }
   }
 
   /**
-   * 发送HTTP请求
+   * 发送HTTP请求（无需JWT验证）
    */
-  async request(url, options = {}, retryCount = 0) {
+  async request(url, options = {}) {
     // 处理查询参数
     let finalUrl = url
     if (options.params) {
       const queryString = new URLSearchParams(options.params).toString()
       finalUrl = `${url}${url.includes('?') ? '&' : '?'}${queryString}`
-      delete options.params // 从options中删除params，避免传递给fetch
-    }
-
-    // 检查token是否即将过期，如果是则先刷新
-    if (this.isTokenExpiringSoon() && this.isAuthenticated() && retryCount === 0) {
-      try {
-        await this.refreshToken()
-      } catch (error) {
-        console.warn('自动刷新token失败，继续使用原token:', error)
-      }
+      delete options.params
     }
 
     const config = {
@@ -57,71 +44,14 @@ class ApiService {
     }
 
     try {
-      console.log(`📡 [API] 发送请求: ${this.baseURL}${finalUrl}`, {
-        method: config.method || 'GET',
-        headers: config.headers,
-        hasBody: !!config.body
-      })
+      console.log(`📡 [API] 发送请求: ${this.baseURL}${finalUrl}`)
       
       const response = await fetch(`${this.baseURL}${finalUrl}`, config)
       
-      console.log(`📥 [API] 收到响应:`, {
-        url: `${this.baseURL}${finalUrl}`,
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-        headers: Object.fromEntries(response.headers.entries())
-      })
+      console.log(`📥 [API] 收到响应: ${response.status}`)
       
       // 检查响应状态
       if (!response.ok) {
-        console.warn(`⚠️ [API] 响应状态异常: ${response.status} ${response.statusText}`)
-        
-        if (response.status === 401) {
-          console.error('❌ ========== 401 未授权错误 ==========')
-          console.error('❌ 请求URL:', `${this.baseURL}${finalUrl}`)
-          console.error('❌ 重试次数:', retryCount)
-          console.error('❌ 是否已认证:', this.isAuthenticated())
-          console.error('❌ 当前路由:', window.location.pathname)
-          
-          // 暂时禁用自动跳转，仅记录日志
-          // 如果是401且是第一次尝试，尝试刷新token后重试
-          if (retryCount === 0 && this.isAuthenticated()) {
-            try {
-              console.log('🔄 尝试刷新token...')
-              await this.refreshToken()
-              // 重试请求（最多重试1次）
-              console.log('🔄 刷新成功，重试请求...')
-              return this.request(url, options, retryCount + 1)
-            } catch (refreshError) {
-              console.error('❌ 刷新token失败:', refreshError)
-              // 暂时不自动跳转，仅抛出错误
-              // this.clearAuth()
-              // window.location.href = '/login'
-              throw new Error('登录已过期，请重新登录')
-            }
-          } else {
-            // 暂时不自动跳转，仅抛出错误
-            console.error('❌ 401错误，但不自动跳转（JWT验证已禁用）')
-            // this.clearAuth()
-            // window.location.href = '/login'
-            throw new Error('登录已过期，请重新登录')
-          }
-        }
-        
-        if (response.status === 403) {
-          console.error('❌ ========== 403 禁止访问错误 ==========')
-          console.error('❌ 请求URL:', `${this.baseURL}${finalUrl}`)
-          console.error('❌ 是否已认证:', this.isAuthenticated())
-          console.error('❌ 当前路由:', window.location.pathname)
-          
-          // 暂时不自动跳转，仅抛出错误
-          console.error('❌ 403错误，但不自动跳转（JWT验证已禁用）')
-          // this.clearAuth()
-          // window.location.href = '/login'
-          throw new Error('您没有权限访问该资源或登录已失效，请重新登录')
-        }
-        
         // 尝试解析错误响应
         let errorData
         try {
@@ -130,10 +60,9 @@ class ApiService {
           errorData = { message: `HTTP ${response.status} ${response.statusText}` }
         }
         
-        // 构建详细的错误消息
+        // 构建错误消息
         let errorMessage = errorData.detail || errorData.message || '请求失败'
         
-        // 如果有验证错误，添加详细信息
         if (errorData.errors) {
           const validationErrors = Object.entries(errorData.errors)
             .map(([field, messages]) => `${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`)
@@ -141,23 +70,17 @@ class ApiService {
           errorMessage = `${errorMessage}\n${validationErrors}`
         }
         
-        console.error('API错误详情:', errorData)
+        console.error('❌ API错误:', errorMessage)
         throw new Error(errorMessage)
       }
 
       // 解析JSON响应
       const data = await response.json()
-      console.log(`✅ [API] 请求成功，响应数据:`, data)
+      console.log(`✅ [API] 请求成功`)
       return data
       
     } catch (error) {
-      console.error('❌ ========== API请求错误 ==========')
-      console.error('❌ 错误URL:', `${this.baseURL}${finalUrl}`)
-      console.error('❌ 错误对象:', error)
-      console.error('❌ 错误消息:', error.message)
-      console.error('❌ 错误堆栈:', error.stack)
-      console.error('❌ 当前路由:', window.location.pathname)
-      console.error('❌ ========== API请求错误结束 ==========')
+      console.error('❌ API请求错误:', error.message)
       throw error
     }
   }
@@ -197,92 +120,28 @@ class ApiService {
   }
 
   /**
-   * 获取认证token
-   */
-  getToken() {
-    return localStorage.getItem('authToken')
-  }
-
-  /**
-   * 检查是否已认证
+   * 检查是否已登录（基于localStorage中的用户信息）
    */
   isAuthenticated() {
-    return !!this.getToken()
+    return !!localStorage.getItem('userInfo')
   }
 
   /**
-   * 清除认证信息
+   * 清除登录信息
    */
   clearAuth() {
-    localStorage.removeItem('authToken')
     localStorage.removeItem('username')
     localStorage.removeItem('userInfo')
-    localStorage.removeItem('tokenExpirationTime')
   }
 
   /**
-   * 保存认证信息
+   * 保存登录信息（无需token）
    */
-  saveAuth(token, userInfo, expiresIn = null) {
-    console.log('🔐 保存认证信息:', { token: token?.substring(0, 20) + '...', userInfo, expiresIn })
-    localStorage.setItem('authToken', token)
+  saveAuth(token, userInfo) {
+    console.log('🔐 保存用户信息:', userInfo)
     localStorage.setItem('username', userInfo.username)
     localStorage.setItem('userInfo', JSON.stringify(userInfo))
-    
-    // 保存token过期时间（提前5分钟刷新）
-    if (expiresIn) {
-      const expirationTime = Date.now() + (expiresIn - 300) * 1000 // 提前5分钟刷新
-      localStorage.setItem('tokenExpirationTime', expirationTime.toString())
-    }
-    console.log('✅ 认证信息已保存到 localStorage')
-  }
-  
-  /**
-   * 检查token是否即将过期
-   */
-  isTokenExpiringSoon() {
-    const expirationTime = localStorage.getItem('tokenExpirationTime')
-    if (!expirationTime) return true // 如果没有过期时间，认为需要刷新
-    
-    return Date.now() >= parseInt(expirationTime)
-  }
-  
-  /**
-   * 刷新token
-   */
-  async refreshToken() {
-    try {
-      const token = this.getToken()
-      if (!token) {
-        throw new Error('没有token可刷新')
-      }
-      
-      const response = await fetch(`${this.baseURL}/auth/refresh`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      })
-      
-      if (!response.ok) {
-        throw new Error('刷新token失败')
-      }
-      
-      const data = await response.json()
-      const refreshData = data.data || data
-      
-      // 更新token和过期时间
-      const userInfo = this.getCurrentUser()
-      if (userInfo) {
-        this.saveAuth(refreshData.accessToken, userInfo, refreshData.expiresIn)
-      }
-      
-      return refreshData
-    } catch (error) {
-      console.error('刷新token失败:', error)
-      throw error
-    }
+    console.log('✅ 用户信息已保存')
   }
 
   /**
@@ -302,7 +161,7 @@ const apiService = new ApiService()
  */
 export const authAPI = {
   /**
-   * 用户登录
+   * 用户登录（无需JWT验证）
    */
   async login(username, password) {
     console.log('📡 发送登录请求:', { username })
@@ -313,12 +172,9 @@ export const authAPI = {
     
     console.log('📥 登录响应:', response)
     
-    // 后端返回格式: { code: 200, message: "...", data: { accessToken, username, email, ... } }
     const loginData = response.data || response
     
-    console.log('📦 解析的登录数据:', loginData)
-    
-    // 构建用户信息对象（后端将用户信息展平在同一级别）
+    // 构建用户信息对象
     const userInfo = {
       userId: loginData.userId,
       username: loginData.username,
@@ -331,12 +187,8 @@ export const authAPI = {
     
     console.log('👤 用户信息:', userInfo)
     
-    // 保存认证信息（包括过期时间）
-    apiService.saveAuth(loginData.accessToken, userInfo, loginData.expiresIn)
-    
-    // 验证保存是否成功
-    console.log('🔍 验证认证状态:', apiService.isAuthenticated())
-    console.log('🔍 localStorage authToken:', localStorage.getItem('authToken')?.substring(0, 20) + '...')
+    // 保存用户信息（无需token）
+    apiService.saveAuth(null, userInfo)
     
     return loginData
   },
@@ -368,15 +220,8 @@ export const authAPI = {
    * 获取当前用户信息
    */
   async getCurrentUser() {
-    const response = await apiService.get('/auth/me')
-    return response.data || response
-  },
-  
-  /**
-   * 刷新访问令牌
-   */
-  async refreshToken() {
-    return await apiService.refreshToken()
+    // 直接从localStorage获取
+    return apiService.getCurrentUser()
   },
 
   /**
