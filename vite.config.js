@@ -37,8 +37,8 @@ export default defineConfig({
       // 转发后端 API（放在流服务之后，作为兜底规则）
       '/api': {
         target: 'http://127.0.0.1:8080',  // Spring Boot后端端口
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/api/, '')  // 移除 /api 前缀
+        changeOrigin: true
+        // 不移除 /api 前缀，保持完整路径
       },
       // 转发 WebSocket
       '/ws': {
