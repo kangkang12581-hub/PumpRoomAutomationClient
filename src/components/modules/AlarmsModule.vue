@@ -234,7 +234,7 @@ export default {
     // 防止循环调用的标志
     let isUpdatingSiteFilter = false
     
-    const filters = ref({
+    const filters = ref({  
       site: 'all',
       level: 'all',
       status: 'Active', // 默认只显示未确认的报警（Active状态）

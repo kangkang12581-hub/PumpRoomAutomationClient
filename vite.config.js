@@ -35,15 +35,14 @@ export default defineConfig({
         }
       },
       // 转发后端 API（放在流服务之后，作为兜底规则）
-      // Java Spring Boot 后端运行在 8080 端口
       '/api': {
-        target: 'http://localhost:8080',
+        target: 'http://0.0.0.0:5000',
         changeOrigin: true,
         rewrite: path => path.replace(/^\/api/, '/api')
       },
       // 转发 WebSocket
       '/ws': {
-        target: 'ws://localhost:8080',
+        target: 'ws://0.0.0.0:5000',
         ws: true,
         changeOrigin: true
       },
